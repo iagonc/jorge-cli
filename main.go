@@ -1,17 +1,21 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"jorge-cli/config"
+	"jorge-cli/router"
 )
 
 func main() {
-	router := gin.Default()
+	// Init config
+	logger := config.GetLogger()
+	
+	err:=config.Init()
+	
+	if err != nil {
+		logger.Error("test")
+		return
+	}
 
-	router.GET("/ping", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-
-	router.Run()
+	// Init Router
+	router.Initialize()
 }
