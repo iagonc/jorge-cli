@@ -14,7 +14,7 @@ import (
 // @Tags resource
 // @Accept json
 // @Produce json
-// @Param request body schemas.Resource true "Request body"
+// @Param request body Resource true "Request body"
 // @Success 200 {object} SuccessResponse
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse

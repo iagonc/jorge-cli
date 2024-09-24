@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/iagonc/jorge-cli/internal/internal/config"
+	"github.com/iagonc/jorge-cli/internal/config"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
