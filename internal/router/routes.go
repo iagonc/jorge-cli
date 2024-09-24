@@ -1,10 +1,10 @@
 package router
 
 import (
-	"github.com/iagonc/jorge-cli/handler"
+	"github.com/iagonc/jorge-cli/internal/handler"
 
 	"github.com/gin-gonic/gin"
-	docs "github.com/iagonc/jorge-cli/docs"
+	docs "github.com/iagonc/jorge-cli/internal/docs"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )

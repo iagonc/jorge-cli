@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/iagonc/jorge-cli/schemas"
 )
 
 func SendError(ctx *gin.Context, code int, message string){
@@ -35,7 +34,12 @@ type ErrorResponse struct {
 	ErrorCode string  `json:"errorCode"`
 }
 
-type CreateResourceResponse struct {
+type Resource struct {
+    Name string `json:"name"`
+    Dns  string `json:"dns"`
+}
+
+type SuccessResponse struct {
 	Message string `json:"message"`
-	Data schemas.Resource `json:"data"`
+	Data Resource `json:"data"`
 }

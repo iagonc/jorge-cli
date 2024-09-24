@@ -3,7 +3,7 @@ package config
 import (
 	"os"
 
-	"github.com/iagonc/jorge-cli/schemas"
+	"github.com/iagonc/jorge-cli/internal/schemas"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"

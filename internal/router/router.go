@@ -1,7 +1,7 @@
 package router
 
 import (
-	"github.com/iagonc/jorge-cli/handler"
+	"github.com/iagonc/jorge-cli/internal/handler"
 
 	"github.com/gin-gonic/gin"
 )

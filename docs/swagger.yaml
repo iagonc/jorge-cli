@@ -1,4 +1,188 @@
+definitions:
+  handler.ErrorResponse:
+    properties:
+      errorCode:
+        type: string
+      message:
+        type: string
+    type: object
+  handler.Resource:
+    properties:
+      dns:
+        type: string
+      name:
+        type: string
+    type: object
+  handler.SuccessResponse:
+    properties:
+      data:
+        $ref: '#/definitions/handler.Resource'
+      message:
+        type: string
+    type: object
+  schemas.Resource:
+    type: object
 info:
   contact: {}
-paths: {}
+paths:
+  /resource:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a resource by its ID
+      parameters:
+      - description: Resource ID
+        in: query
+        name: id
+        type: string
+      - description: Request body containing the resource details
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/handler.Resource'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Delete resource
+      tags:
+      - resource
+    post:
+      consumes:
+      - application/json
+      description: Create a new resource with DNS
+      parameters:
+      - description: Request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.Resource'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Create resource
+      tags:
+      - resource
+    put:
+      consumes:
+      - application/json
+      description: Update an existing resource by its ID
+      parameters:
+      - description: Resource ID
+        in: query
+        name: id
+        required: true
+        type: string
+      - description: Updated resource details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.Resource'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: Update resource
+      tags:
+      - resource
+  /resources:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of resources
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handler.Resource'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: List resources
+      tags:
+      - resource
+  /resources/name:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of resources filtered by name
+      parameters:
+      - description: Resource name
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handler.SuccessResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.ErrorResponse'
+      summary: List resources by name
+      tags:
+      - resource
 swagger: "2.0"
