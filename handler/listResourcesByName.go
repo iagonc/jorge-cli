@@ -2,8 +2,9 @@ package handler
 
 import (
 	"fmt"
-	"jorge-cli/schemas"
 	"net/http"
+
+	"github.com/iagonc/jorge-cli/schemas"
 
 	"github.com/gin-gonic/gin"
 )

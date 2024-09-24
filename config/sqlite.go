@@ -1,8 +1,9 @@
 package config
 
 import (
-	"jorge-cli/schemas"
 	"os"
+
+	"github.com/iagonc/jorge-cli/schemas"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"

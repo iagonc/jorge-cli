@@ -1,8 +1,8 @@
 package main
 
 import (
-	"jorge-cli/config"
-	"jorge-cli/router"
+	"github.com/iagonc/jorge-cli/config"
+	"github.com/iagonc/jorge-cli/router"
 )
 
 func main() {
