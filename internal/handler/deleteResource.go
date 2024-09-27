@@ -8,7 +8,7 @@ import (
 	"github.com/iagonc/jorge-cli/internal/repository"
 )
 
-// DeleteResourceHandler é responsável por chamar o use case para deletar o recurso
+// DeleteResourceHandler handles the deletion of a resource by calling the use case.
 func (h *Handler) DeleteResourceHandler(ctx *gin.Context) {
     id := ctx.Query("id")
     if id == "" {
@@ -24,13 +24,12 @@ func (h *Handler) DeleteResourceHandler(ctx *gin.Context) {
 
     err = h.DeleteResourceUseCase.Execute(uint(resourceID))
     if err != nil {
-        // Verifica se o erro é um erro de recurso não encontrado
         if err == repository.ErrResourceNotFound {
             SendError(ctx, http.StatusNotFound, err.Error())
             return
         }
 
-        // Para outros tipos de erro, retorna um erro interno
+        // For other errors, return a general internal server error.
         SendError(ctx, http.StatusInternalServerError, "Error: could not delete resource")
         return
     }

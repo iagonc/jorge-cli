@@ -8,7 +8,7 @@ import (
 	"github.com/iagonc/jorge-cli/internal/schemas"
 )
 
-// UpdateResourceHandler é responsável por chamar o use case para atualizar o recurso
+// UpdateResourceHandler handles updating an existing resource by calling the use case.
 func (h *Handler) UpdateResourceHandler(ctx *gin.Context) {
     id := ctx.Query("id")
     if id == "" {

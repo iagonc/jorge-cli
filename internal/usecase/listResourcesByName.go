@@ -15,10 +15,11 @@ func NewListResourcesByNameUseCase(repo repository.ResourceRepository, logger *z
     return &ListResourcesByNameUseCase{repo: repo, logger: logger}
 }
 
+// Execute retrieves resources by name and logs relevant information or errors
 func (uc *ListResourcesByNameUseCase) Execute(name string) ([]*schemas.Resource, error) {
     resources, err := uc.repo.ListByName(name)
     if err != nil {
-        uc.logger.Sugar().Errorf("Failed to list resources by name %s: %v", name, err)
+        uc.logger.Sugar().Errorf("Failed to list resources by name '%s': %v", name, err)
         return nil, err
     }
 

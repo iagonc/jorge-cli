@@ -5,7 +5,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// Handler estrutura que agrupa os casos de uso e o logger
+// Handler groups the use cases and the logger.
 type Handler struct {
     CreateResourceUseCase     *usecase.CreateResourceUseCase
     DeleteResourceUseCase     *usecase.DeleteResourceUseCase
@@ -15,7 +15,7 @@ type Handler struct {
     logger                    *zap.Logger
 }
 
-// NewHandler constrói o handler injetando os casos de uso e o logger
+// NewHandler constructs a new Handler by injecting the use cases and the logger.
 func NewHandler(
     createResourceUseCase *usecase.CreateResourceUseCase,
     deleteResourceUseCase *usecase.DeleteResourceUseCase,

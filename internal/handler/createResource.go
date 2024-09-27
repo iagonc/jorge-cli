@@ -7,7 +7,7 @@ import (
 	"github.com/iagonc/jorge-cli/internal/schemas"
 )
 
-// CreateResourceHandler é responsável por chamar o use case para criar o recurso
+// CreateResourceHandler handles the creation of a new resource by calling the use case.
 func (h *Handler) CreateResourceHandler(ctx *gin.Context) {
     ValidateEmptyRequest(ctx)
     if ctx.IsAborted() {
@@ -28,4 +28,3 @@ func (h *Handler) CreateResourceHandler(ctx *gin.Context) {
 
     SendSuccess(ctx, "create-resource", &request)
 }
-

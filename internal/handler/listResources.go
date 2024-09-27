@@ -6,11 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ListResourcesHandler é responsável por chamar o use case para listar recursos
+// ListResourcesHandler handles the request to retrieve all resources.
 func (h *Handler) ListResourcesHandler(ctx *gin.Context) {
     resources, err := h.ListResourcesUseCase.Execute()
     if err != nil {
-        SendError(ctx, http.StatusInternalServerError, "Error listing resources")
+        SendError(ctx, http.StatusInternalServerError, "Error fetching resources")
         return
     }
 

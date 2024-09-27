@@ -17,14 +17,15 @@ func NewCreateResourceUseCase(repo repository.ResourceRepository, logger *zap.Lo
     return &CreateResourceUseCase{repo: repo, logger: logger}
 }
 
+// Execute creates a new resource and logs relevant information or errors
 func (uc *CreateResourceUseCase) Execute(resource *schemas.Resource) error {
     if _, err := uc.repo.FindByName(resource.Name); err == nil {
-        uc.logger.Sugar().Errorf("Resource with name %s already exists", resource.Name)
-        return fmt.Errorf("resource with name %s already exists", resource.Name)
+        uc.logger.Sugar().Errorf("Resource with name '%s' already exists", resource.Name)
+        return fmt.Errorf("resource with name '%s' already exists", resource.Name)
     }
 
     if _, err := uc.repo.FindByDNS(resource.Dns); err == nil {
-        uc.logger.Sugar().Errorf("Resource with DNS %s already exists", resource.Dns)
+        uc.logger.Sugar().Errorf("Resource with DNS '%s' already exists", resource.Dns)
         return err
     }
 

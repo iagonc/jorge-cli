@@ -15,6 +15,7 @@ func NewListResourcesUseCase(repo repository.ResourceRepository, logger *zap.Log
     return &ListResourcesUseCase{repo: repo, logger: logger}
 }
 
+// Execute retrieves and logs all available resources
 func (uc *ListResourcesUseCase) Execute() ([]*schemas.Resource, error) {
     resources, err := uc.repo.List()
     if err != nil {

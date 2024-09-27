@@ -14,24 +14,21 @@ func NewDeleteResourceUseCase(repo repository.ResourceRepository, logger *zap.Lo
     return &DeleteResourceUseCase{repo: repo, logger: logger}
 }
 
+// Execute deletes a resource by ID and logs relevant information or errors
 func (uc *DeleteResourceUseCase) Execute(id uint) error {
-    // Verificar se o recurso existe
     resource, err := uc.repo.FindByID(id)
     if err != nil {
-        // Verifica se o erro é que o recurso não foi encontrado
         if err == repository.ErrResourceNotFound {
             uc.logger.Sugar().Errorf("Resource with ID %d not found", id)
-            return err // Retorna erro personalizado
+            return repository.ErrResourceNotFound
         }
-        // Loga outros erros
-        uc.logger.Sugar().Errorf("Error finding resource with ID %d: %v", id, err)
-        return err // Retorna erro genérico
+        uc.logger.Sugar().Errorf("Failed to retrieve resource with ID %d: %v", id, err)
+        return err
     }
 
-    // Deletar o recurso
     if err := uc.repo.Delete(resource.ID); err != nil {
         uc.logger.Sugar().Errorf("Failed to delete resource with ID %d: %v", id, err)
-        return err // Retorna erro genérico
+        return err
     }
 
     uc.logger.Info("Resource deleted successfully", zap.Uint("id", id))

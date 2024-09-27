@@ -15,6 +15,7 @@ func NewUpdateResourceUseCase(repo repository.ResourceRepository, logger *zap.Lo
     return &UpdateResourceUseCase{repo: repo, logger: logger}
 }
 
+// Execute updates a resource and logs relevant information or errors
 func (uc *UpdateResourceUseCase) Execute(resource *schemas.Resource) error {
     if err := uc.repo.Update(resource); err != nil {
         uc.logger.Sugar().Errorf("Failed to update resource with ID %d: %v", resource.ID, err)

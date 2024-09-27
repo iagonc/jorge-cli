@@ -13,12 +13,8 @@ content-type: application/json
     "dns":"test.consul.com.br"
 }
 ### DELETE resources catalog
-DELETE http://localhost:8080/api/v1/resource?id=1
+DELETE http://localhost:8080/api/v1/resource?id=7
 
-{
-    "name":"consul",
-    "dns":"test.consul.com.br"
-}
 ### PUT resources catalog
 PUT http://localhost:8080/api/v1/resource?id=7
 

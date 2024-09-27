@@ -10,34 +10,34 @@ import (
 )
 
 func main() {
-	// Inicializando o logger
-	logger, _ := zap.NewProduction()
-	defer logger.Sync()
-	
-	// Configuração do banco de dados
-	db, err := config.InitializeSQLite()
-	if err != nil {
-		logger.Sugar().Errorf("Failed to initialize SQLite: %v", err)
-	}
-	repo := repository.NewSQLiteResourceRepository(db)
+    // Initialize logger
+    logger, _ := zap.NewProduction()
+    defer logger.Sync()
 
-	// Inicializando os casos de uso com o repositório e o logger
-	createUseCase := usecase.NewCreateResourceUseCase(repo, logger)
-	deleteUseCase := usecase.NewDeleteResourceUseCase(repo, logger)
-	listUseCase := usecase.NewListResourcesUseCase(repo, logger)
-	listByNameUseCase := usecase.NewListResourcesByNameUseCase(repo, logger)
-	updateUseCase := usecase.NewUpdateResourceUseCase(repo, logger)
+    // Initialize SQLite database
+    db, err := config.InitializeSQLite()
+    if err != nil {
+        logger.Sugar().Errorf("Failed to initialize SQLite: %v", err)
+    }
+    repo := repository.NewSQLiteResourceRepository(db)
 
-	// Inicializando o handler com os casos de uso e o logger
-	h := handler.NewHandler(
-		createUseCase, 
-		deleteUseCase, 
-		listUseCase, 
-		listByNameUseCase, 
-		updateUseCase, 
-		logger,
-	)
+    // Initialize use cases with the repository and logger
+    createUseCase := usecase.NewCreateResourceUseCase(repo, logger)
+    deleteUseCase := usecase.NewDeleteResourceUseCase(repo, logger)
+    listUseCase := usecase.NewListResourcesUseCase(repo, logger)
+    listByNameUseCase := usecase.NewListResourcesByNameUseCase(repo, logger)
+    updateUseCase := usecase.NewUpdateResourceUseCase(repo, logger)
 
-	// Passa o handler para o router e inicializa as rotas
-	router.Initialize(h)
+    // Initialize handler with the use cases and logger
+    h := handler.NewHandler(
+        createUseCase,
+        deleteUseCase,
+        listUseCase,
+        listByNameUseCase,
+        updateUseCase,
+        logger,
+    )
+
+    // Pass the handler to the router and initialize routes
+    router.Initialize(h)
 }
