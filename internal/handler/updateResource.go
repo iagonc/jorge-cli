@@ -2,50 +2,42 @@ package handler
 
 import (
 	"net/http"
-
-	"github.com/iagonc/jorge-cli/internal/schemas"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/iagonc/jorge-cli/internal/schemas"
 )
 
-// @Summary Update resource
-// @Description Update an existing resource by its ID
-// @Tags resource
-// @Accept json
-// @Produce json
-// @Param id query string true "Resource ID"
-// @Param request body Resource true "Updated resource details"
-// @Success 200 {object} SuccessResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /resource [put]
-func UpdateResourceHandler(ctx *gin.Context){
-	id := ctx.Query("id")
-	if id == "" {
-		SendError(ctx, http.StatusBadRequest, "ID is required")
-		return
-	}
+// UpdateResourceHandler é responsável por chamar o use case para atualizar o recurso
+func (h *Handler) UpdateResourceHandler(ctx *gin.Context) {
+    id := ctx.Query("id")
+    if id == "" {
+        SendError(ctx, http.StatusBadRequest, "ID is required")
+        return
+    }
 
-	var request schemas.Resource
+    resourceID, err := strconv.Atoi(id)
+    if err != nil {
+        SendError(ctx, http.StatusBadRequest, "Invalid resource ID")
+        return
+    }
 
-	ValidateRequiredFields(ctx, &request)
-	if ctx.IsAborted() {
-		return
-	}
+    var request schemas.Resource
+    ValidateRequiredFields(ctx, &request)
+    if ctx.IsAborted() {
+        return
+    }
 
-	// TODO: migrar pra validation
-	var resource schemas.Resource
-	if err := db.First(&resource, id).Error; err != nil {
-		SendError(ctx, http.StatusNotFound, "Resource not found")
-		return
-	}
+    request.ID = uint(resourceID)
+    err = h.UpdateResourceUseCase.Execute(&request)
+    if err != nil {
+        if err.Error() == "resource not found" {
+            SendError(ctx, http.StatusNotFound, "Resource not found")
+        } else {
+            SendError(ctx, http.StatusInternalServerError, "Error updating resource")
+        }
+        return
+    }
 
-	if err := db.Model(&resource).Updates(request).Error; err != nil {
-		SendError(ctx, http.StatusInternalServerError, "Error updating resource")
-		return
-	}
-
-	SendSuccess(ctx, "resource-updated", &resource)
-	
+    SendSuccess(ctx, "resource-updated", &request)
 }

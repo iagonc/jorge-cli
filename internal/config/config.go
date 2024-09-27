@@ -12,9 +12,6 @@ var (
 )
 
 func Init() error {
-	// Initialize Logger
-	logger = GetLogger()
-
 	// Initialize SQLite
 	db, err = InitializeSQLite()
 

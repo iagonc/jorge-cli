@@ -1,5 +1,5 @@
 ### GET resources catalog
-GET http://localhost:8080/api/v1/resources?name=consul
+GET http://localhost:8080/api/v1/resources/name?name=consul
 
 ### GET resources catalog
 GET http://localhost:8080/api/v1/resources
@@ -9,11 +9,11 @@ POST http://localhost:8080/api/v1/resource
 content-type: application/json
 
 {
-    "name":"jorgysss",
+    "name":"consul",
     "dns":"test.consul.com.br"
 }
 ### DELETE resources catalog
-DELETE http://localhost:8080/api/v1/resource?id=3
+DELETE http://localhost:8080/api/v1/resource?id=1
 
 {
     "name":"consul",
@@ -23,6 +23,6 @@ DELETE http://localhost:8080/api/v1/resource?id=3
 PUT http://localhost:8080/api/v1/resource?id=7
 
 {
-    "name":"jorgin",
-    "dns":"aaaaaaa"
+    "name":"consul",
+    "dns":"test.consul.com.br"
 }

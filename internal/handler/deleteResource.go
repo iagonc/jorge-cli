@@ -1,56 +1,39 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
-
-	"github.com/iagonc/jorge-cli/internal/schemas"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/iagonc/jorge-cli/internal/repository"
 )
 
-// @Summary Delete resource
-// @Description Delete a resource by its ID
-// @Tags resource
-// @Accept json
-// @Produce json
-// @Param id query string false "Resource ID"
-// @Param request body Resource false "Request body containing the resource details"
-// @Success 200 {object} SuccessResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 404 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /resource [delete]
-func DeleteResourceHandler(ctx *gin.Context){
-	ValidateEmptyRequest(ctx)
-	if ctx.IsAborted() {
-		return
-	}
+// DeleteResourceHandler é responsável por chamar o use case para deletar o recurso
+func (h *Handler) DeleteResourceHandler(ctx *gin.Context) {
+    id := ctx.Query("id")
+    if id == "" {
+        SendError(ctx, http.StatusBadRequest, "Error: missing ID field")
+        return
+    }
 
-	id := ctx.Query("id")
-	
-	if id == ""{
-		SendError(ctx, http.StatusBadRequest, "Error: missing ID field")
-		return
-	}
+    resourceID, err := strconv.Atoi(id)
+    if err != nil {
+        SendError(ctx, http.StatusBadRequest, "Invalid resource ID")
+        return
+    }
 
-	var request schemas.Resource
+    err = h.DeleteResourceUseCase.Execute(uint(resourceID))
+    if err != nil {
+        // Verifica se o erro é um erro de recurso não encontrado
+        if err == repository.ErrResourceNotFound {
+            SendError(ctx, http.StatusNotFound, err.Error())
+            return
+        }
 
-	ValidateRequiredFields(ctx, &request)
-	if ctx.IsAborted() {
-		return
-	}
+        // Para outros tipos de erro, retorna um erro interno
+        SendError(ctx, http.StatusInternalServerError, "Error: could not delete resource")
+        return
+    }
 
-	if err := db.First(&request, id).Error; err != nil {
-		SendError(ctx, http.StatusNotFound, fmt.Sprintf("Resource with id: %s not found", id))
-		return
-	}
-
-	err := db.Delete(&request).Error
-	if err != nil {
-		SendError(ctx, http.StatusInternalServerError, "Error: could not delete resource")
-		return
-	}
-
-	SendSuccess(ctx, "delete-resource", &request)
+    SendSuccess(ctx, "delete-resource", resourceID)
 }

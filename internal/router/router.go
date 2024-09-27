@@ -1,16 +1,16 @@
 package router
 
 import (
-	"github.com/iagonc/jorge-cli/internal/handler"
-
 	"github.com/gin-gonic/gin"
+	"github.com/iagonc/jorge-cli/internal/handler"
 )
 
-func Initialize() {
+func Initialize(h *handler.Handler) {
 	router := gin.Default()
-	handler.InitializeHandler()
 
-	initializeRoutes(router)
+	// Inicialize as rotas com o handler injetado
+	initializeRoutes(router, h)
 
+	// Inicie o servidor
 	router.Run(":8080")
 }
