@@ -6,7 +6,7 @@ APP_NAME=jorge-cli
 default: run-api
 
 run-api:
-	@swag init -g ./cmd/api/main.go --parseDependency -o ./docs -q
+	@swag init -g ./cmd/api/main.go --parseDependency -parseInternal
 	@go run ./cmd/api/main.go
 build:
 	@go build -o $(APP_NAME) main.go

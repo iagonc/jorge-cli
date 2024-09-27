@@ -1,4 +1,170 @@
+definitions:
+  gin.H:
+    additionalProperties: {}
+    type: object
+  github_com_iagonc_jorge-cli_internal_schemas.Resource:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      dns:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - dns
+    - name
+    type: object
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
 info:
   contact: {}
-paths: {}
+paths:
+  /resource:
+    delete:
+      description: Delete a resource by its ID
+      parameters:
+      - description: Resource ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: Successfully deleted
+          schema:
+            $ref: '#/definitions/gin.H'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Resource not found
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Delete a resource
+      tags:
+      - Resources
+    post:
+      consumes:
+      - application/json
+      description: Create a new resource with the provided JSON body
+      parameters:
+      - description: Resource Data
+        in: body
+        name: resource
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_iagonc_jorge-cli_internal_schemas.Resource'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully created
+          schema:
+            $ref: '#/definitions/github_com_iagonc_jorge-cli_internal_schemas.Resource'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Create a resource
+      tags:
+      - Resources
+    put:
+      consumes:
+      - application/json
+      description: Update an existing resource with the provided JSON body and ID
+      parameters:
+      - description: Resource ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: Updated Resource Data
+        in: body
+        name: resource
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_iagonc_jorge-cli_internal_schemas.Resource'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated
+          schema:
+            $ref: '#/definitions/github_com_iagonc_jorge-cli_internal_schemas.Resource'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "404":
+          description: Resource not found
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: Update a resource
+      tags:
+      - Resources
+  /resources:
+    get:
+      description: Retrieve a list of all resources
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of resources
+          schema:
+            items:
+              $ref: '#/definitions/github_com_iagonc_jorge-cli_internal_schemas.Resource'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: List all resources
+      tags:
+      - Resources
+  /resources/name:
+    get:
+      description: Retrieve a list of resources that match the given name
+      parameters:
+      - description: Resource Name
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of resources
+          schema:
+            items:
+              $ref: '#/definitions/github_com_iagonc_jorge-cli_internal_schemas.Resource'
+            type: array
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/gin.H'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: List resources by name
+      tags:
+      - Resources
 swagger: "2.0"

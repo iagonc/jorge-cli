@@ -9,6 +9,15 @@ import (
 )
 
 // DeleteResourceHandler handles the deletion of a resource by calling the use case.
+// DeleteResourceHandler deletes a resource by ID
+// @Summary Delete a resource
+// @Description Delete a resource by its ID
+// @Tags Resources
+// @Param id query int true "Resource ID"
+// @Success 200 {object} gin.H "Successfully deleted"
+// @Failure 400 {object} gin.H "Bad request"
+// @Failure 404 {object} gin.H "Resource not found"
+// @Router /resource [delete]
 func (h *Handler) DeleteResourceHandler(ctx *gin.Context) {
     id := ctx.Query("id")
     if id == "" {
