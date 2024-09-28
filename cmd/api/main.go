@@ -22,16 +22,18 @@ func main() {
     repo := repository.NewSQLiteResourceRepository(db)
 
     // Initialize use cases with the repository and logger
-    createUseCase := usecase.NewCreateResourceUseCase(repo, logger)
-    deleteUseCase := usecase.NewDeleteResourceUseCase(repo, logger)
-    listUseCase := usecase.NewListResourcesUseCase(repo, logger)
-    listByNameUseCase := usecase.NewListResourcesByNameUseCase(repo, logger)
-    updateUseCase := usecase.NewUpdateResourceUseCase(repo, logger)
+    createUseCase := usecase.NewCreateResource(repo, logger)
+    deleteUseCase := usecase.NewDeleteResource(repo, logger)
+    getResourceByIDUseCase := usecase.NewGetResourceByID(repo, logger)
+    listUseCase := usecase.NewListResources(repo, logger)
+    listByNameUseCase := usecase.NewListResourcesByName(repo, logger)
+    updateUseCase := usecase.NewUpdateResource(repo, logger)
 
     // Initialize handler with the use cases and logger
     h := handler.NewHandler(
         createUseCase,
         deleteUseCase,
+        getResourceByIDUseCase,
         listUseCase,
         listByNameUseCase,
         updateUseCase,
