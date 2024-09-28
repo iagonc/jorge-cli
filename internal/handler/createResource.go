@@ -30,7 +30,7 @@ func (h *Handler) CreateResourceHandler(ctx *gin.Context) {
         return
     }
 
-    err := h.CreateResourceUseCase.Execute(&request)
+    err := h.CreateResource.Execute(&request)
     if err != nil {
         SendError(ctx, http.StatusBadRequest, err.Error())
         return

@@ -7,29 +7,32 @@ import (
 
 // Handler groups the use cases and the logger.
 type Handler struct {
-    CreateResourceUseCase     *usecase.CreateResourceUseCase
-    DeleteResourceUseCase     *usecase.DeleteResourceUseCase
-    ListResourcesUseCase      *usecase.ListResourcesUseCase
-    ListResourcesByNameUseCase *usecase.ListResourcesByNameUseCase
-    UpdateResourceUseCase     *usecase.UpdateResourceUseCase
+    CreateResource     *usecase.CreateResource
+    DeleteResource     *usecase.DeleteResource
+    GetResourceByID     *usecase.GetResourceByID
+    ListResources      *usecase.ListResources
+    ListResourcesByName *usecase.ListResourcesByName
+    UpdateResource     *usecase.UpdateResource
     logger                    *zap.Logger
 }
 
 // NewHandler constructs a new Handler by injecting the use cases and the logger.
 func NewHandler(
-    createResourceUseCase *usecase.CreateResourceUseCase,
-    deleteResourceUseCase *usecase.DeleteResourceUseCase,
-    listResourcesUseCase *usecase.ListResourcesUseCase,
-    listResourcesByNameUseCase *usecase.ListResourcesByNameUseCase,
-    updateResourceUseCase *usecase.UpdateResourceUseCase,
+    createResource *usecase.CreateResource,
+    deleteResource *usecase.DeleteResource,
+    getResourceByID *usecase.GetResourceByID,
+    listResources *usecase.ListResources,
+    listResourcesByName *usecase.ListResourcesByName,
+    updateResource *usecase.UpdateResource,
     logger *zap.Logger,
 ) *Handler {
     return &Handler{
-        CreateResourceUseCase:     createResourceUseCase,
-        DeleteResourceUseCase:     deleteResourceUseCase,
-        ListResourcesUseCase:      listResourcesUseCase,
-        ListResourcesByNameUseCase: listResourcesByNameUseCase,
-        UpdateResourceUseCase:     updateResourceUseCase,
+        CreateResource:     createResource,
+        DeleteResource:     deleteResource,
+        GetResourceByID:    getResourceByID,
+        ListResources:      listResources,
+        ListResourcesByName: listResourcesByName,
+        UpdateResource:     updateResource,
         logger:                    logger,
     }
 }

@@ -16,6 +16,7 @@ func initializeRoutes(router *gin.Engine, h *handler.Handler) {
 	{
 		v1.GET("/resources", h.ListResourcesHandler)
 		v1.GET("/resources/name", h.ListResourcesByNameHandler)
+		v1.GET("/resource", h.GetResourceByIDHandler)
 		v1.POST("/resource", h.CreateResourceHandler)
 		v1.PUT("/resource", h.UpdateResourceHandler)
 		v1.DELETE("/resource", h.DeleteResourceHandler)

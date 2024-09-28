@@ -42,7 +42,7 @@ func (h *Handler) UpdateResourceHandler(ctx *gin.Context) {
     }
 
     request.ID = uint(resourceID)
-    err = h.UpdateResourceUseCase.Execute(&request)
+    err = h.UpdateResource.Execute(&request)
     if err != nil {
         if err.Error() == "resource not found" {
             SendError(ctx, http.StatusNotFound, "Resource not found")

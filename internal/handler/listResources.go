@@ -17,7 +17,7 @@ import (
 // @Failure 500 {object} gin.H "Internal Server Error"
 // @Router /resources [get]
 func (h *Handler) ListResourcesHandler(ctx *gin.Context) {
-    resources, err := h.ListResourcesUseCase.Execute()
+    resources, err := h.ListResources.Execute()
     if err != nil {
         SendError(ctx, http.StatusInternalServerError, "Error fetching resources")
         return

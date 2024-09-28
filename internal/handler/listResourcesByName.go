@@ -25,7 +25,7 @@ func (h *Handler) ListResourcesByNameHandler(ctx *gin.Context) {
         return
     }
 
-    resources, err := h.ListResourcesByNameUseCase.Execute(name)
+    resources, err := h.ListResourcesByName.Execute(name)
     if err != nil {
         SendError(ctx, http.StatusInternalServerError, "Error fetching resources")
         return

@@ -6,17 +6,17 @@ import (
 	"go.uber.org/zap"
 )
 
-type ListResourcesByNameUseCase struct {
+type ListResourcesByName struct {
     repo   repository.ResourceRepository
     logger *zap.Logger
 }
 
-func NewListResourcesByNameUseCase(repo repository.ResourceRepository, logger *zap.Logger) *ListResourcesByNameUseCase {
-    return &ListResourcesByNameUseCase{repo: repo, logger: logger}
+func NewListResourcesByName(repo repository.ResourceRepository, logger *zap.Logger) *ListResourcesByName {
+    return &ListResourcesByName{repo: repo, logger: logger}
 }
 
 // Execute retrieves resources by name and logs relevant information or errors
-func (uc *ListResourcesByNameUseCase) Execute(name string) ([]*schemas.Resource, error) {
+func (uc *ListResourcesByName) Execute(name string) ([]*schemas.Resource, error) {
     resources, err := uc.repo.ListByName(name)
     if err != nil {
         uc.logger.Sugar().Errorf("Failed to list resources by name '%s': %v", name, err)

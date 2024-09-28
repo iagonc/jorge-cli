@@ -6,17 +6,17 @@ import (
 	"go.uber.org/zap"
 )
 
-type UpdateResourceUseCase struct {
+type UpdateResource struct {
     repo   repository.ResourceRepository
     logger *zap.Logger
 }
 
-func NewUpdateResourceUseCase(repo repository.ResourceRepository, logger *zap.Logger) *UpdateResourceUseCase {
-    return &UpdateResourceUseCase{repo: repo, logger: logger}
+func NewUpdateResource(repo repository.ResourceRepository, logger *zap.Logger) *UpdateResource {
+    return &UpdateResource{repo: repo, logger: logger}
 }
 
 // Execute updates a resource and logs relevant information or errors
-func (uc *UpdateResourceUseCase) Execute(resource *schemas.Resource) error {
+func (uc *UpdateResource) Execute(resource *schemas.Resource) error {
     if err := uc.repo.Update(resource); err != nil {
         uc.logger.Sugar().Errorf("Failed to update resource with ID %d: %v", resource.ID, err)
         return err

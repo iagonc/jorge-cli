@@ -18,7 +18,7 @@ import (
 // @Failure 400 {object} gin.H "Bad request"
 // @Failure 404 {object} gin.H "Resource not found"
 // @Router /resource [delete]
-func (h *Handler) DeleteResourceHandler(ctx *gin.Context) {
+func (h *Handler) GetResourceByIDHandler(ctx *gin.Context) {
     id := ctx.Query("id")
     if id == "" {
         SendError(ctx, http.StatusBadRequest, "Error: missing ID field")
@@ -31,16 +31,16 @@ func (h *Handler) DeleteResourceHandler(ctx *gin.Context) {
         return
     }
 
-    resource, err := h.DeleteResource.Execute(uint(resourceID))
+    resource, err := h.GetResourceByID.Execute(uint(resourceID))
     if err != nil {
         if err == repository.ErrResourceNotFound {
             SendError(ctx, http.StatusNotFound, err.Error())
             return
         }
 
-        SendError(ctx, http.StatusInternalServerError, "Error: could not delete resource")
+        SendError(ctx, http.StatusInternalServerError, "Error: could not get resource")
         return
     }
 
-    SendSuccess(ctx, "delete-resource", resource)
+    SendSuccess(ctx, "get-resource-by-id", resource)
 }

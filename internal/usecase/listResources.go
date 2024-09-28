@@ -6,17 +6,17 @@ import (
 	"go.uber.org/zap"
 )
 
-type ListResourcesUseCase struct {
+type ListResources struct {
     repo   repository.ResourceRepository
     logger *zap.Logger
 }
 
-func NewListResourcesUseCase(repo repository.ResourceRepository, logger *zap.Logger) *ListResourcesUseCase {
-    return &ListResourcesUseCase{repo: repo, logger: logger}
+func NewListResources(repo repository.ResourceRepository, logger *zap.Logger) *ListResources {
+    return &ListResources{repo: repo, logger: logger}
 }
 
 // Execute retrieves and logs all available resources
-func (uc *ListResourcesUseCase) Execute() ([]*schemas.Resource, error) {
+func (uc *ListResources) Execute() ([]*schemas.Resource, error) {
     resources, err := uc.repo.List()
     if err != nil {
         uc.logger.Sugar().Errorf("Failed to list resources: %v", err)

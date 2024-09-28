@@ -6,17 +6,17 @@ import (
 	"go.uber.org/zap"
 )
 
-type DeleteResource struct {
+type GetResourceByID struct {
     repo   repository.ResourceRepository
     logger *zap.Logger
 }
 
-func NewDeleteResource(repo repository.ResourceRepository, logger *zap.Logger) *DeleteResource {
-    return &DeleteResource{repo: repo, logger: logger}
+func NewGetResourceByID(repo repository.ResourceRepository, logger *zap.Logger) *GetResourceByID {
+    return &GetResourceByID{repo: repo, logger: logger}
 }
 
 // Execute deletes a resource by ID and returns the deleted resource or an error
-func (uc *DeleteResource) Execute(id uint) (*schemas.Resource, error) {
+func (uc *GetResourceByID) Execute(id uint) (*schemas.Resource, error) {
     // Retrieve the resource before deleting it
     resource, err := uc.repo.FindByID(id)
     if err != nil {
@@ -28,13 +28,7 @@ func (uc *DeleteResource) Execute(id uint) (*schemas.Resource, error) {
         return nil, err
     }
 
-    // Delete the resource
-    if err := uc.repo.Delete(resource.ID); err != nil {
-        uc.logger.Sugar().Errorf("Failed to delete resource with ID %d: %v", id, err)
-        return nil, err
-    }
-
-    uc.logger.Info("Resource deleted successfully", zap.Uint("id", id))
+    uc.logger.Info("Resource found successfully", zap.Uint("id", id))
 
     // Return the deleted resource
     return resource, nil
