@@ -1,0 +1,11 @@
+# .toolsversion
+
+# Tools required for Jorge CLI
+
+- iftop: ^1.0.0
+- dig: ^9.16.1
+- nslookup: ^9.16.1
+- traceroute: ^2.1.0
+- curl: ^7.68.0
+- ping: ^3.0.0
+- netstat: ^2.0.0

@@ -11,6 +11,7 @@ import (
 	"github.com/iagonc/jorge-cli/cmd/cli/pkg/utils"
 	"go.uber.org/zap"
 )
+
 func (s *ResourceUsecase) CreateResource(ctx context.Context, name, dns string) (*models.Resource, error) {
     resource := models.CreateRequest{
         Name: name,
