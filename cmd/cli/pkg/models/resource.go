@@ -1,11 +1,12 @@
 package models
 
 type Resource struct {
-    ID        int    `json:"id"`
-    Name      string `json:"name"`
-    Dns       string `json:"dns"`
-    CreatedAt string `json:"created_at"`
-    UpdatedAt string `json:"updated_at"`
+    ID        int     `json:"ID"`
+    Name      string  `json:"name"`
+    Dns       string  `json:"dns"`
+    CreatedAt string  `json:"CreatedAt"`
+    UpdatedAt string  `json:"UpdatedAt"`
+    DeletedAt *string `json:"DeletedAt,omitempty"`
 }
 
 type CreateRequest struct {
@@ -29,6 +30,11 @@ type UpdateResponse struct {
 }
 
 type DeleteResponse struct {
+    Data    Resource `json:"data"`
+    Message string   `json:"message"`
+}
+
+type GetResponse struct {
     Data    Resource `json:"data"`
     Message string   `json:"message"`
 }

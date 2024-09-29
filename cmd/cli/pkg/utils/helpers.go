@@ -4,41 +4,59 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 )
 
-// SendRequest sends an HTTP request and returns the response.
-func SendRequest(req *http.Request) (*http.Response, error) {
-    client := &http.Client{
-        Timeout: 10 * time.Second,
+// HTTPClient defines an interface for sending HTTP requests.
+type HTTPClient interface {
+    Do(req *http.Request) (*http.Response, error)
+}
+
+// NewHTTPClient creates a new HTTP client with the specified timeout.
+func NewHTTPClient(timeout time.Duration) HTTPClient {
+    return &http.Client{
+        Timeout: timeout,
     }
-    return client.Do(req)
 }
 
-// ParseResponse parses the JSON response into the provided interface.
-func ParseResponse(resp *http.Response, result interface{}) error {
-    defer resp.Body.Close()
-    decoder := json.NewDecoder(resp.Body)
-    return decoder.Decode(result)
-}
-
-// PrintError prints an error message to stderr.
-func PrintError(action string, err error) {
-    fmt.Fprintf(os.Stderr, "Error %s: %v\n", action, err)
+// ParseErrorResponse parses the API error response and returns a formatted error.
+func ParseErrorResponse(resp *http.Response) error {
+    var errResp struct {
+        Error   string `json:"error"`
+        Message string `json:"message"`
+    }
+    bodyBytes, err := io.ReadAll(resp.Body)
+    if err != nil {
+        return fmt.Errorf("HTTP %d: %s", resp.StatusCode, http.StatusText(resp.StatusCode))
+    }
+    if err := json.Unmarshal(bodyBytes, &errResp); err != nil {
+        return fmt.Errorf("HTTP %d: %s - %s", resp.StatusCode, http.StatusText(resp.StatusCode), string(bodyBytes))
+    }
+    return fmt.Errorf("API Error: %s - %s", errResp.Error, errResp.Message)
 }
 
 // ConfirmAction prompts the user for confirmation.
 func ConfirmAction(prompt string) bool {
-    fmt.Print(prompt)
     reader := bufio.NewReader(os.Stdin)
-    confirmation, err := reader.ReadString('\n')
-    if err != nil {
-        fmt.Fprintf(os.Stderr, "Error reading confirmation: %v\n", err)
-        return false
+    for {
+        fmt.Print(prompt)
+        input, err := reader.ReadString('\n')
+        if err != nil {
+            fmt.Fprintf(os.Stderr, "Error reading input: %v\n", err)
+            return false
+        }
+        input = strings.TrimSpace(strings.ToLower(input))
+        switch input {
+        case "yes", "y":
+            return true
+        case "no", "n":
+            return false
+        default:
+            fmt.Println("Invalid input. Please type 'yes' or 'no'.")
+        }
     }
-    confirmation = strings.TrimSpace(strings.ToLower(confirmation))
-    return confirmation == "yes" || confirmation == "y"
 }
