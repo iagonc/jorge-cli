@@ -17,42 +17,42 @@ import (
 )
 
 func main() {
-    // Carrega as configurações
+    // Load configurations
     cfg, err := config.LoadConfig()
     if err != nil {
-        fmt.Fprintf(os.Stderr, "Erro ao carregar configurações: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Error loading configurations: %v\n", err)
         os.Exit(1)
     }
 
-    // Inicializa o logger
+    // Initialize the logger
     logger, err := zap.NewProduction()
     if err != nil {
-        fmt.Fprintf(os.Stderr, "Erro ao inicializar o logger: %v\n", err)
+        fmt.Fprintf(os.Stderr, "Error initializing logger: %v\n", err)
         os.Exit(1)
     }
     defer logger.Sync()
 
-    // Inicializa o cliente HTTP
+    // Initialize the HTTP client
     client := utils.NewHTTPClient(cfg.Timeout)
 
-    // Inicializa o serviço de recursos
+    // Initialize the resource service
     resourceService := services.NewResourceService(client, cfg, logger)
 
-    // Configura o comando root
+    // Set up the root command
     var rootCmd = &cobra.Command{
         Use:     "cli",
         Short:   "CLI to interact with the API",
-        Long:    "A command line tool to interact with the API for managing resources.",
+        Long:    "A command-line tool to interact with the API for managing resources.",
         Version: cfg.Version,
     }
 
-    // Adiciona os comandos, passando o resourceService
+    // Add commands, passing the resourceService
     rootCmd.AddCommand(commands.NewListCommand(resourceService))
     rootCmd.AddCommand(commands.NewCreateCommand(resourceService))
     rootCmd.AddCommand(commands.NewDeleteCommand(resourceService))
     rootCmd.AddCommand(commands.NewUpdateCommand(resourceService))
 
-    // Gerencia sinais do sistema para cancelamento
+    // Handle system signals for graceful shutdown
     ctx, cancel := context.WithCancel(context.Background())
     defer cancel()
 
@@ -63,9 +63,9 @@ func main() {
         cancel()
     }()
 
-    // Executa o comando com o contexto
+    // Execute the root command with context
     if err := rootCmd.ExecuteContext(ctx); err != nil {
-        logger.Sugar().Errorf("Erro ao executar comando: %v", err)
+        logger.Sugar().Errorf("Error executing command: %v", err)
         os.Exit(1)
     }
 }

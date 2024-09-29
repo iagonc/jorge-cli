@@ -4,5 +4,5 @@ import (
 	"go.uber.org/zap"
 )
 
-// Logger global para ser usado em todo o projeto
+// Log is a global logger to be used throughout the project
 var Log *zap.Logger

@@ -31,12 +31,12 @@ func NewResourceService(client utils.HTTPClient, cfg *config.Config, logger *zap
 }
 
 func (s *ResourceService) CreateResource(ctx context.Context, name, dns string) (*models.Resource, error) {
-    // Validações
+    // Validations
     if len(name) < 3 {
-        return nil, fmt.Errorf("o nome deve ter pelo menos 3 caracteres")
+        return nil, fmt.Errorf("name must be at least 3 characters long")
     }
     if !isValidDNS(dns) {
-        return nil, fmt.Errorf("formato de DNS inválido")
+        return nil, fmt.Errorf("invalid DNS format")
     }
 
     resource := models.CreateRequest{
@@ -46,19 +46,19 @@ func (s *ResourceService) CreateResource(ctx context.Context, name, dns string) 
 
     jsonData, err := json.Marshal(resource)
     if err != nil {
-        return nil, fmt.Errorf("erro ao serializar JSON: %w", err)
+        return nil, fmt.Errorf("error marshaling JSON: %w", err)
     }
 
     url := fmt.Sprintf("%s/resource", s.Config.APIBaseURL)
     req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
     if err != nil {
-        return nil, fmt.Errorf("erro ao criar requisição HTTP: %w", err)
+        return nil, fmt.Errorf("error creating HTTP request: %w", err)
     }
     req.Header.Set("Content-Type", "application/json")
 
     resp, err := s.Client.Do(req)
     if err != nil {
-        return nil, fmt.Errorf("erro ao enviar requisição: %w", err)
+        return nil, fmt.Errorf("error sending request: %w", err)
     }
     defer resp.Body.Close()
 
@@ -68,10 +68,10 @@ func (s *ResourceService) CreateResource(ctx context.Context, name, dns string) 
 
     var createResp models.CreateResponse
     if err := json.NewDecoder(resp.Body).Decode(&createResp); err != nil {
-        return nil, fmt.Errorf("erro ao decodificar resposta: %w", err)
+        return nil, fmt.Errorf("error decoding response: %w", err)
     }
 
-    s.Logger.Info("Recurso criado", zap.Int("ID", createResp.Data.ID))
+    s.Logger.Info("Resource created", zap.Int("ID", createResp.Data.ID))
 
     return &createResp.Data, nil
 }
@@ -81,24 +81,24 @@ func (s *ResourceService) GetResourceByID(ctx context.Context, id int) (*models.
 
     req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
     if err != nil {
-        return nil, fmt.Errorf("erro ao criar requisição: %w", err)
+        return nil, fmt.Errorf("error creating request: %w", err)
     }
 
     resp, err := s.Client.Do(req)
     if err != nil {
-        return nil, fmt.Errorf("erro ao enviar requisição: %w", err)
+        return nil, fmt.Errorf("error sending request: %w", err)
     }
     defer resp.Body.Close()
 
     if resp.StatusCode == http.StatusNotFound {
-        return nil, fmt.Errorf("recurso com ID %d não encontrado", id)
+        return nil, fmt.Errorf("resource with ID %d not found", id)
     } else if resp.StatusCode < 200 || resp.StatusCode >= 300 {
         return nil, utils.ParseErrorResponse(resp)
     }
 
     var getResp models.GetResponse
     if err := json.NewDecoder(resp.Body).Decode(&getResp); err != nil {
-        return nil, fmt.Errorf("erro ao decodificar resposta: %w", err)
+        return nil, fmt.Errorf("error decoding response: %w", err)
     }
 
     return &getResp.Data, nil
@@ -112,34 +112,34 @@ func (s *ResourceService) DeleteResource(ctx context.Context, id int) (*models.R
 
     req, err := http.NewRequestWithContext(ctx, "DELETE", fullURL, nil)
     if err != nil {
-        return nil, fmt.Errorf("erro ao criar requisição: %w", err)
+        return nil, fmt.Errorf("error creating request: %w", err)
     }
 
     resp, err := s.Client.Do(req)
     if err != nil {
-        return nil, fmt.Errorf("erro ao enviar requisição: %w", err)
+        return nil, fmt.Errorf("error sending request: %w", err)
     }
     defer resp.Body.Close()
 
     if resp.StatusCode == http.StatusNotFound {
-        return nil, fmt.Errorf("recurso com ID %d não encontrado", id)
+        return nil, fmt.Errorf("resource with ID %d not found", id)
     } else if resp.StatusCode < 200 || resp.StatusCode >= 300 {
         return nil, utils.ParseErrorResponse(resp)
     }
 
     var deleteResp models.DeleteResponse
     if err := json.NewDecoder(resp.Body).Decode(&deleteResp); err != nil {
-        return nil, fmt.Errorf("erro ao decodificar resposta: %w", err)
+        return nil, fmt.Errorf("error decoding response: %w", err)
     }
 
-    s.Logger.Info("Recurso deletado", zap.Int("ID", deleteResp.Data.ID))
+    s.Logger.Info("Resource deleted", zap.Int("ID", deleteResp.Data.ID))
 
     return &deleteResp.Data, nil
 }
 
 func (s *ResourceService) UpdateResource(ctx context.Context, id int, name, dns string) (*models.Resource, error) {
     if name == "" && dns == "" {
-        return nil, fmt.Errorf("pelo menos um de 'name' ou 'dns' deve ser fornecido")
+        return nil, fmt.Errorf("at least one of 'name' or 'dns' must be provided")
     }
 
     updateReq := models.UpdateRequest{
@@ -149,7 +149,7 @@ func (s *ResourceService) UpdateResource(ctx context.Context, id int, name, dns 
 
     jsonData, err := json.Marshal(updateReq)
     if err != nil {
-        return nil, fmt.Errorf("erro ao serializar JSON: %w", err)
+        return nil, fmt.Errorf("error marshaling JSON: %w", err)
     }
 
     baseURL := fmt.Sprintf("%s/resource", s.Config.APIBaseURL)
@@ -159,28 +159,28 @@ func (s *ResourceService) UpdateResource(ctx context.Context, id int, name, dns 
 
     req, err := http.NewRequestWithContext(ctx, "PUT", fullURL, bytes.NewBuffer(jsonData))
     if err != nil {
-        return nil, fmt.Errorf("erro ao criar requisição: %w", err)
+        return nil, fmt.Errorf("error creating request: %w", err)
     }
     req.Header.Set("Content-Type", "application/json")
 
     resp, err := s.Client.Do(req)
     if err != nil {
-        return nil, fmt.Errorf("erro ao enviar requisição: %w", err)
+        return nil, fmt.Errorf("error sending request: %w", err)
     }
     defer resp.Body.Close()
 
     if resp.StatusCode == http.StatusNotFound {
-        return nil, fmt.Errorf("recurso com ID %d não encontrado", id)
+        return nil, fmt.Errorf("resource with ID %d not found", id)
     } else if resp.StatusCode < 200 || resp.StatusCode >= 300 {
         return nil, utils.ParseErrorResponse(resp)
     }
 
     var updateResp models.UpdateResponse
     if err := json.NewDecoder(resp.Body).Decode(&updateResp); err != nil {
-        return nil, fmt.Errorf("erro ao decodificar resposta: %w", err)
+        return nil, fmt.Errorf("error decoding response: %w", err)
     }
 
-    s.Logger.Info("Recurso atualizado", zap.Int("ID", updateResp.Data.ID))
+    s.Logger.Info("Resource updated", zap.Int("ID", updateResp.Data.ID))
 
     return &updateResp.Data, nil
 }
@@ -190,12 +190,12 @@ func (s *ResourceService) ListResources(ctx context.Context) ([]models.Resource,
 
     req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
     if err != nil {
-        return nil, fmt.Errorf("erro ao criar requisição: %w", err)
+        return nil, fmt.Errorf("error creating request: %w", err)
     }
 
     resp, err := s.Client.Do(req)
     if err != nil {
-        return nil, fmt.Errorf("erro ao enviar requisição: %w", err)
+        return nil, fmt.Errorf("error sending request: %w", err)
     }
     defer resp.Body.Close()
 
@@ -205,13 +205,13 @@ func (s *ResourceService) ListResources(ctx context.Context) ([]models.Resource,
 
     var apiResponse models.ApiResponse
     if err := json.NewDecoder(resp.Body).Decode(&apiResponse); err != nil {
-        return nil, fmt.Errorf("erro ao decodificar resposta: %w", err)
+        return nil, fmt.Errorf("error decoding response: %w", err)
     }
 
     return apiResponse.Data, nil
 }
 
 func isValidDNS(dns string) bool {
-    // Implementar validação de DNS conforme necessário
+    // Implement DNS validation as needed
     return len(dns) > 3
 }

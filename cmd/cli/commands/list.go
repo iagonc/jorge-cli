@@ -15,16 +15,16 @@ import (
 func NewListCommand(service *services.ResourceService) *cobra.Command {
     return &cobra.Command{
         Use:   "list",
-        Short: "Lista todos os recursos",
+        Short: "List all resources",
         Run: func(cmd *cobra.Command, args []string) {
             ctx := cmd.Context()
             resources, err := service.ListResources(ctx)
             if err != nil {
-                service.Logger.Error("Erro ao listar recursos", zap.Error(err))
+                service.Logger.Error("Error listing resources", zap.Error(err))
                 return
             }
 
-            // Estilos com Lipgloss
+            // Styles with Lipgloss
             headerStyle := lipgloss.NewStyle().
                 Bold(true).
                 Foreground(lipgloss.Color("#FAFAFA")).
@@ -54,7 +54,7 @@ func NewListCommand(service *services.ResourceService) *cobra.Command {
     }
 }
 
-// formatDate formata a string de data para um formato legível
+// formatDate formats the date string into a human-readable format
 func formatDate(dateStr string) string {
     parsedTime, err := time.Parse(time.RFC3339Nano, dateStr)
     if err != nil {

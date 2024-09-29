@@ -17,29 +17,29 @@ func NewUpdateCommand(service *services.ResourceService) *cobra.Command {
 
     cmd := &cobra.Command{
         Use:   "update",
-        Short: "Atualiza um recurso existente",
+        Short: "Update an existing resource",
         Run: func(cmd *cobra.Command, args []string) {
             ctx := cmd.Context()
             idInt, err := strconv.Atoi(id)
             if err != nil {
-                service.Logger.Error("--id deve ser um inteiro válido")
+                service.Logger.Error("--id must be a valid integer")
                 return
             }
 
             updatedResource, err := service.UpdateResource(ctx, idInt, name, dns)
             if err != nil {
-                service.Logger.Error("Erro ao atualizar recurso", zap.Error(err))
+                service.Logger.Error("Error updating resource", zap.Error(err))
                 return
             }
 
             successStyle := lipgloss.NewStyle().
                 Bold(true).
-                Foreground(lipgloss.Color("#FFD700")). // Cor dourada
+                Foreground(lipgloss.Color("#FFD700")). // Gold color
                 Padding(1, 2).
                 Align(lipgloss.Center)
 
             result := successStyle.Render(
-                fmt.Sprintf("Recurso Atualizado:\nID: %d\nName: %s\nDNS: %s",
+                fmt.Sprintf("Resource Updated:\nID: %d\nName: %s\nDNS: %s",
                     updatedResource.ID, updatedResource.Name, updatedResource.Dns),
             )
 
@@ -47,10 +47,10 @@ func NewUpdateCommand(service *services.ResourceService) *cobra.Command {
         },
     }
 
-    // Adiciona flags para "id", "name" e "dns"
-    cmd.Flags().StringVarP(&id, "id", "i", "", "ID do recurso (obrigatório)")
-    cmd.Flags().StringVarP(&name, "name", "n", "", "Novo nome do recurso")
-    cmd.Flags().StringVarP(&dns, "dns", "d", "", "Novo DNS do recurso")
+    // Add flags for "id", "name", and "dns"
+    cmd.Flags().StringVarP(&id, "id", "i", "", "Resource ID (required)")
+    cmd.Flags().StringVarP(&name, "name", "n", "", "New resource name")
+    cmd.Flags().StringVarP(&dns, "dns", "d", "", "New resource DNS")
     cmd.MarkFlagRequired("id")
 
     return cmd
