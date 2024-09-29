@@ -5,21 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
+
+	"github.com/iagonc/jorge-cli/cmd/cli/pkg/utils"
+
+	"github.com/iagonc/jorge-cli/cmd/cli/pkg/models"
 )
-
-type CreateRequest struct {
-    Name string `json:"name"`
-    Dns  string `json:"dns"`
-}
-
-type CreateResponse struct {
-    Data    Resource `json:"data"`
-    Message string   `json:"message"`
-}
 
 // NewCreateCommand creates the "create" command with flags for name and DNS.
 func NewCreateCommand() *cobra.Command {
@@ -29,11 +22,9 @@ func NewCreateCommand() *cobra.Command {
         Use:   "create",
         Short: "Create a new resource",
         Run: func(cmd *cobra.Command, args []string) {
-            if name == "" || dns == "" {
-                fmt.Fprintln(os.Stderr, "Error: --name and --dns are required")
-                return
+            if err := createResource(name, dns); err != nil {
+                utils.PrintError("creating resource", err)
             }
-            createResource(name, dns)
         },
     }
 
@@ -47,8 +38,8 @@ func NewCreateCommand() *cobra.Command {
 }
 
 // createResource sends a request to create a resource with the provided name and DNS.
-func createResource(name, dns string) {
-    resource := CreateRequest{
+func createResource(name, dns string) error {
+    resource := models.CreateRequest{
         Name: name,
         Dns:  dns,
     }
@@ -56,38 +47,32 @@ func createResource(name, dns string) {
     // Convert resource to JSON
     jsonData, err := json.Marshal(resource)
     if err != nil {
-        fmt.Fprintf(os.Stderr, "Error marshalling JSON: %v\n", err)
-        return
+        return fmt.Errorf("marshalling JSON: %w", err)
     }
 
     // Create HTTP request
-    req, err := http.NewRequest("POST", "http://localhost:8080/api/v1/resource", bytes.NewBuffer(jsonData))
+    url := fmt.Sprintf("%s/resource", utils.APIBaseURL)
+    req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
     if err != nil {
-        fmt.Fprintf(os.Stderr, "Error creating HTTP request: %v\n", err)
-        return
+        return fmt.Errorf("creating HTTP request: %w", err)
     }
     req.Header.Set("Content-Type", "application/json")
 
     // Send the request
-    client := &http.Client{}
-    resp, err := client.Do(req)
+    resp, err := utils.SendRequest(req)
     if err != nil {
-        fmt.Fprintf(os.Stderr, "Error sending request: %v\n", err)
-        return
+        return fmt.Errorf("sending request: %w", err)
     }
-    defer resp.Body.Close()
 
     // Check response status code
     if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
-        fmt.Fprintf(os.Stderr, "Unexpected server response: %s\n", resp.Status)
-        return
+        return fmt.Errorf("unexpected server response: %s", resp.Status)
     }
 
     // Decode the response
-    var createResp CreateResponse
-    if err := json.NewDecoder(resp.Body).Decode(&createResp); err != nil {
-        fmt.Fprintf(os.Stderr, "Error decoding response: %v\n", err)
-        return
+    var createResp models.CreateResponse
+    if err := utils.ParseResponse(resp, &createResp); err != nil {
+        return fmt.Errorf("decoding response: %w", err)
     }
 
     // Success message styling
@@ -101,4 +86,5 @@ func createResource(name, dns string) {
     )
 
     fmt.Println(successStyle.Render(result))
+    return nil
 }

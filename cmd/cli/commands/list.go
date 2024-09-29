@@ -1,94 +1,87 @@
 package commands
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
+
+	"github.com/iagonc/jorge-cli/cmd/cli/pkg/utils"
+
+	"github.com/iagonc/jorge-cli/cmd/cli/pkg/models"
 )
-
-// Resource represents a resource with metadata
-type ResourceWithTimestamps struct {
-    ID        uint   `json:"ID"`
-    Name      string `json:"name"`
-    Dns       string `json:"dns"`
-    CreatedAt string `json:"CreatedAt"`
-    UpdatedAt string `json:"UpdatedAt"`
-}
-
-// ApiResponse represents the API response structure
-type ApiResponse struct {
-	Data    []ResourceWithTimestamps `json:"data"`
-	Message string     `json:"message"`
-}
 
 // NewListCommand creates the "list" command
 func NewListCommand() *cobra.Command {
-	return &cobra.Command{
-		Use:   "list",
-		Short: "List all resources",
-		Run: func(cmd *cobra.Command, args []string) {
-			listResources()
-		},
-	}
+    return &cobra.Command{
+        Use:   "list",
+        Short: "List all resources",
+        Run: func(cmd *cobra.Command, args []string) {
+            if err := listResources(); err != nil {
+                utils.PrintError("listing resources", err)
+            }
+        },
+    }
 }
 
-func listResources() {
-	resp, err := http.Get("http://localhost:8080/api/v1/resources")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error fetching resources: %v\n", err)
-		return
-	}
-	defer resp.Body.Close()
+func listResources() error {
+    url := fmt.Sprintf("%s/resources", utils.APIBaseURL)
+    req, err := http.NewRequest("GET", url, nil)
+    if err != nil {
+        return fmt.Errorf("creating request: %w", err)
+    }
 
-	if resp.StatusCode != http.StatusOK {
-		fmt.Fprintf(os.Stderr, "Unexpected server response: %s\n", resp.Status)
-		return
-	}
+    resp, err := utils.SendRequest(req)
+    if err != nil {
+        return fmt.Errorf("sending request: %w", err)
+    }
 
-	var apiResponse ApiResponse
-	if err := json.NewDecoder(resp.Body).Decode(&apiResponse); err != nil {
-		fmt.Fprintf(os.Stderr, "Error decoding response: %v\n", err)
-		return
-	}
+    if resp.StatusCode != http.StatusOK {
+        return fmt.Errorf("unexpected server response: %s", resp.Status)
+    }
 
-	// Styles with Lipgloss
-	headerStyle := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#FAFAFA")).
-		Background(lipgloss.Color("#7D56F4")).
-		Padding(0, 1).
-		Align(lipgloss.Left)
+    var apiResponse models.ApiResponse
+    if err := utils.ParseResponse(resp, &apiResponse); err != nil {
+        return fmt.Errorf("decoding response: %w", err)
+    }
 
-	rowStyle := lipgloss.NewStyle().
-		Padding(0, 1).
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("#7D56F4"))
+    // Styles with Lipgloss
+    headerStyle := lipgloss.NewStyle().
+        Bold(true).
+        Foreground(lipgloss.Color("#FAFAFA")).
+        Background(lipgloss.Color("#7D56F4")).
+        Padding(0, 1).
+        Align(lipgloss.Left)
 
-	tableHeader := headerStyle.Render(fmt.Sprintf("%-5s %-20s %-30s %-20s %-20s", "ID", "Name", "DNS", "CreatedAt", "UpdatedAt"))
-	fmt.Println(tableHeader)
+    rowStyle := lipgloss.NewStyle().
+        Padding(0, 1).
+        BorderStyle(lipgloss.NormalBorder()).
+        BorderForeground(lipgloss.Color("#7D56F4"))
 
-	for _, resource := range apiResponse.Data {
-		createdAtFormatted := formatDate(resource.CreatedAt)
-		updatedAtFormatted := formatDate(resource.UpdatedAt)
+    tableHeader := headerStyle.Render(fmt.Sprintf("%-5s %-20s %-30s %-20s %-20s", "ID", "Name", "DNS", "CreatedAt", "UpdatedAt"))
+    fmt.Println(tableHeader)
 
-		resourceRow := fmt.Sprintf(
-			"%-5d %-20s %-30s %-20s %-20s",
-			resource.ID, resource.Name, resource.Dns, createdAtFormatted, updatedAtFormatted,
-		)
-		fmt.Println(rowStyle.Render(resourceRow))
-	}
+    for _, resource := range apiResponse.Data {
+        createdAtFormatted := formatDate(resource.CreatedAt)
+        updatedAtFormatted := formatDate(resource.UpdatedAt)
+
+        resourceRow := fmt.Sprintf(
+            "%-5d %-20s %-30s %-20s %-20s",
+            resource.ID, resource.Name, resource.Dns, createdAtFormatted, updatedAtFormatted,
+        )
+        fmt.Println(rowStyle.Render(resourceRow))
+    }
+
+    return nil
 }
 
 // formatDate formats the date string into a human-readable format
 func formatDate(dateStr string) string {
-	parsedTime, err := time.Parse(time.RFC3339, dateStr)
-	if err != nil {
-		return dateStr
-	}
-	return parsedTime.Format("2006-01-02 15:04")
+    parsedTime, err := time.Parse(time.RFC3339, dateStr)
+    if err != nil {
+        return dateStr
+    }
+    return parsedTime.Format("2006-01-02 15:04")
 }

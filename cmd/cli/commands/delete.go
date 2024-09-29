@@ -1,134 +1,127 @@
 package commands
 
 import (
-	"bufio"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
-	"strings"
+	"strconv"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
-)
 
-type DeleteResponse struct {
-	Data    Resource `json:"data"`
-	Message string   `json:"message"`
-}
+	"github.com/iagonc/jorge-cli/cmd/cli/pkg/utils"
+
+	"github.com/iagonc/jorge-cli/cmd/cli/pkg/models"
+)
 
 // NewDeleteCommand creates the "delete" command
 func NewDeleteCommand() *cobra.Command {
-	var id string
+    var id string
 
-	cmd := &cobra.Command{
-		Use:   "delete",
-		Short: "Delete a resource by ID",
-		Run: func(cmd *cobra.Command, args []string) {
-			deleteResource(id)
-		},
-	}
+    cmd := &cobra.Command{
+        Use:   "delete",
+        Short: "Delete a resource by ID",
+        Run: func(cmd *cobra.Command, args []string) {
+            if err := deleteResource(id); err != nil {
+                utils.PrintError("deleting resource", err)
+            }
+        },
+    }
 
-	// Add flag for "id"
-	cmd.Flags().StringVarP(&id, "id", "i", "", "Resource ID (required)")
-	cmd.MarkFlagRequired("id")
+    // Add flag for "id"
+    cmd.Flags().StringVarP(&id, "id", "i", "", "Resource ID (required)")
+    cmd.MarkFlagRequired("id")
 
-	return cmd
+    return cmd
 }
 
-func deleteResource(id string) {
-	// Fetch the resource details by ID
-	resource, err := fetchResourceByID(id)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error fetching resource: %v\n", err)
-		return
-	}
+func deleteResource(id string) error {
+    // Validate ID
+    _, err := strconv.Atoi(id)
+    if err != nil {
+        return fmt.Errorf("--id must be a valid integer")
+    }
 
-	// Show resource details
-	fmt.Printf("Resource Details:\nID: %d\nName: %s\nDNS: %s\n", resource.ID, resource.Name, resource.Dns)
+    // Fetch the resource details by ID
+    resource, err := fetchResourceByID(id)
+    if err != nil {
+        return fmt.Errorf("fetching resource: %w", err)
+    }
 
-	// Ask for confirmation
-	fmt.Print("Are you sure you want to delete this resource? (yes/no): ")
-	reader := bufio.NewReader(os.Stdin)
-	confirmation, err := reader.ReadString('\n')
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error reading confirmation: %v\n", err)
-		return
-	}
-	confirmation = strings.TrimSpace(confirmation)
+    // Show resource details
+    fmt.Printf("Resource Details:\nID: %d\nName: %s\nDNS: %s\n", resource.ID, resource.Name, resource.Dns)
 
-	if strings.ToLower(confirmation) != "yes" {
-		fmt.Println("Delete operation canceled.")
-		return
-	}
+    // Ask for confirmation
+    if !utils.ConfirmAction("Are you sure you want to delete this resource? (yes/no): ") {
+        fmt.Println("Delete operation canceled.")
+        return nil
+    }
 
-	// Proceed with deletion if confirmed
-	client := &http.Client{}
-	baseURL := "http://localhost:8080/api/v1/resource"
-	params := url.Values{}
-	params.Add("id", id)
-	fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
+    // Proceed with deletion if confirmed
+    baseURL := fmt.Sprintf("%s/resource", utils.APIBaseURL)
+    params := url.Values{}
+    params.Add("id", id)
+    fullURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 
-	req, err := http.NewRequest("DELETE", fullURL, nil)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error creating request: %v\n", err)
-		return
-	}
+    req, err := http.NewRequest("DELETE", fullURL, nil)
+    if err != nil {
+        return fmt.Errorf("creating request: %w", err)
+    }
 
-	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error deleting resource: %v\n", err)
-		return
-	}
-	defer resp.Body.Close()
+    resp, err := utils.SendRequest(req)
+    if err != nil {
+        return fmt.Errorf("deleting resource: %w", err)
+    }
 
-	if resp.StatusCode == http.StatusNotFound {
-		fmt.Printf("Resource with ID %s not found\n", id)
-		return
-	} else if resp.StatusCode != http.StatusOK {
-		fmt.Fprintf(os.Stderr, "Unexpected server response: %s\n", resp.Status)
-		return
-	}
+    if resp.StatusCode == http.StatusNotFound {
+        fmt.Printf("Resource with ID %s not found\n", id)
+        return nil
+    } else if resp.StatusCode != http.StatusOK {
+        return fmt.Errorf("unexpected server response: %s", resp.Status)
+    }
 
-	var deleteResp DeleteResponse
-	if err := json.NewDecoder(resp.Body).Decode(&deleteResp); err != nil {
-		fmt.Fprintf(os.Stderr, "Error decoding response: %v\n", err)
-		return
-	}
+    var deleteResp models.DeleteResponse
+    if err := utils.ParseResponse(resp, &deleteResp); err != nil {
+        return fmt.Errorf("decoding response: %w", err)
+    }
 
-	successStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#FF6347")). // Soft red color
-		Bold(true)
+    successStyle := lipgloss.NewStyle().
+        Foreground(lipgloss.Color("#FF6347")). // Soft red color
+        Bold(true)
 
-	// Show details of deleted resource
-	result := fmt.Sprintf(
-		"Resource Deleted: \nID: %d\nName: %s\nDNS: %s",
-		deleteResp.Data.ID, deleteResp.Data.Name, deleteResp.Data.Dns,
-	)
+    // Show details of deleted resource
+    result := fmt.Sprintf(
+        "Resource Deleted:\nID: %d\nName: %s\nDNS: %s",
+        deleteResp.Data.ID, deleteResp.Data.Name, deleteResp.Data.Dns,
+    )
 
-	fmt.Println(successStyle.Render(result))
+    fmt.Println(successStyle.Render(result))
+    return nil
 }
 
 // fetchResourceByID fetches the resource details by ID before deletion
-func fetchResourceByID(id string) (*Resource, error) {
-	resp, err := http.Get("http://localhost:8080/api/v1/resource?id=" + id)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch resource: %v", err)
-	}
-	defer resp.Body.Close()
+func fetchResourceByID(id string) (*models.Resource, error) {
+    url := fmt.Sprintf("%s/resource?id=%s", utils.APIBaseURL, id)
+    req, err := http.NewRequest("GET", url, nil)
+    if err != nil {
+        return nil, fmt.Errorf("creating request: %w", err)
+    }
 
-	// Check if the resource was found
-	if resp.StatusCode == http.StatusNotFound {
-		return nil, fmt.Errorf("resource with ID %s not found", id)
-	} else if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected server response: %s", resp.Status)
-	}
+    resp, err := utils.SendRequest(req)
+    if err != nil {
+        return nil, fmt.Errorf("sending request: %w", err)
+    }
 
-	var deleteResp DeleteResponse
-	if err := json.NewDecoder(resp.Body).Decode(&deleteResp); err != nil {
-		return nil, fmt.Errorf("failed to decode resource: %v", err)
-	}
+    if resp.StatusCode == http.StatusNotFound {
+        return nil, fmt.Errorf("resource with ID %s not found", id)
+    } else if resp.StatusCode != http.StatusOK {
+        return nil, fmt.Errorf("unexpected server response: %s", resp.Status)
+    }
 
-	return &deleteResp.Data, nil
+    var getResp models.DeleteResponse
+    if err := utils.ParseResponse(resp, &getResp); err != nil {
+        return nil, fmt.Errorf("decoding response: %w", err)
+    }
+
+    return &getResp.Data, nil
 }
