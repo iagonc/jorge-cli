@@ -2,7 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
@@ -21,15 +20,18 @@ func NewDeleteCommand(service *services.ResourceService) *cobra.Command {
         Short: "Delete a resource by ID",
         Run: func(cmd *cobra.Command, args []string) {
             ctx := cmd.Context()
-            idInt, err := strconv.Atoi(id)
+
+            idInt, err := utils.ParseID(id)
             if err != nil {
-                service.Logger.Error("--id must be a valid integer")
+                service.Logger.Error("Invalid ID", zap.Error(err))
+                fmt.Println(err)
                 return
             }
 
             resource, err := service.GetResourceByID(ctx, idInt)
             if err != nil {
                 service.Logger.Error("Error fetching resource", zap.Error(err))
+                fmt.Println("Error fetching resource:", err)
                 return
             }
 
@@ -46,6 +48,7 @@ func NewDeleteCommand(service *services.ResourceService) *cobra.Command {
             deletedResource, err := service.DeleteResource(ctx, idInt)
             if err != nil {
                 service.Logger.Error("Error deleting resource", zap.Error(err))
+                fmt.Println("Error deleting resource:", err)
                 return
             }
 

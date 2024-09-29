@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/iagonc/jorge-cli/cmd/cli/pkg/services"
+	"github.com/iagonc/jorge-cli/cmd/cli/pkg/utils"
 )
 
 func NewCreateCommand(service *services.ResourceService) *cobra.Command {
@@ -18,9 +19,18 @@ func NewCreateCommand(service *services.ResourceService) *cobra.Command {
         Short: "Create a new resource",
         Run: func(cmd *cobra.Command, args []string) {
             ctx := cmd.Context()
+
+            // Validate inputs
+            if err := utils.ValidateCreateInputs(name, dns); err != nil {
+                service.Logger.Error("Invalid input", zap.Error(err))
+                fmt.Println(err)
+                return
+            }
+
             resource, err := service.CreateResource(ctx, name, dns)
             if err != nil {
                 service.Logger.Error("Error creating resource", zap.Error(err))
+                fmt.Println("Error creating resource:", err)
                 return
             }
 

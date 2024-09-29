@@ -2,12 +2,12 @@ package commands
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 
 	"github.com/iagonc/jorge-cli/cmd/cli/pkg/services"
+	"github.com/iagonc/jorge-cli/cmd/cli/pkg/utils"
 
 	"go.uber.org/zap"
 )
@@ -21,6 +21,7 @@ func NewListCommand(service *services.ResourceService) *cobra.Command {
             resources, err := service.ListResources(ctx)
             if err != nil {
                 service.Logger.Error("Error listing resources", zap.Error(err))
+                fmt.Println("Error listing resources:", err)
                 return
             }
 
@@ -41,8 +42,8 @@ func NewListCommand(service *services.ResourceService) *cobra.Command {
             fmt.Println(tableHeader)
 
             for _, resource := range resources {
-                createdAtFormatted := formatDate(resource.CreatedAt)
-                updatedAtFormatted := formatDate(resource.UpdatedAt)
+                createdAtFormatted := utils.FormatDate(resource.CreatedAt)
+                updatedAtFormatted := utils.FormatDate(resource.UpdatedAt)
 
                 resourceRow := fmt.Sprintf(
                     "%-5d %-20s %-30s %-20s %-20s",
@@ -52,13 +53,4 @@ func NewListCommand(service *services.ResourceService) *cobra.Command {
             }
         },
     }
-}
-
-// formatDate formats the date string into a human-readable format
-func formatDate(dateStr string) string {
-    parsedTime, err := time.Parse(time.RFC3339Nano, dateStr)
-    if err != nil {
-        return dateStr
-    }
-    return parsedTime.Format("2006-01-02 15:04")
 }

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"time"
 
 	"github.com/spf13/viper"
@@ -23,6 +24,11 @@ func LoadConfig() (*Config, error) {
         APIBaseURL: viper.GetString("API_BASE_URL"),
         Timeout:    viper.GetDuration("TIMEOUT") * time.Second,
         Version:    viper.GetString("VERSION"),
+    }
+
+    // Validate configurations
+    if cfg.APIBaseURL == "" {
+        return nil, errors.New("API_BASE_URL is required")
     }
 
     return cfg, nil

@@ -2,12 +2,12 @@ package commands
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 
 	"github.com/iagonc/jorge-cli/cmd/cli/pkg/services"
+	"github.com/iagonc/jorge-cli/cmd/cli/pkg/utils"
 
 	"go.uber.org/zap"
 )
@@ -20,15 +20,23 @@ func NewUpdateCommand(service *services.ResourceService) *cobra.Command {
         Short: "Update an existing resource",
         Run: func(cmd *cobra.Command, args []string) {
             ctx := cmd.Context()
-            idInt, err := strconv.Atoi(id)
+
+            idInt, err := utils.ParseID(id)
             if err != nil {
-                service.Logger.Error("--id must be a valid integer")
+                service.Logger.Error("Invalid ID", zap.Error(err))
+                fmt.Println(err)
+                return
+            }
+
+            if name == "" && dns == "" {
+                fmt.Println("At least one of 'name' or 'dns' must be provided")
                 return
             }
 
             updatedResource, err := service.UpdateResource(ctx, idInt, name, dns)
             if err != nil {
                 service.Logger.Error("Error updating resource", zap.Error(err))
+                fmt.Println("Error updating resource:", err)
                 return
             }
 

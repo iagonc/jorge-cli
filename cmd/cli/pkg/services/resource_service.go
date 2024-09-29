@@ -15,6 +15,9 @@ import (
 
 	"go.uber.org/zap"
 )
+type HTTPClient interface {
+    Do(req *http.Request) (*http.Response, error)
+}
 
 type ResourceService struct {
     Client utils.HTTPClient
@@ -31,14 +34,6 @@ func NewResourceService(client utils.HTTPClient, cfg *config.Config, logger *zap
 }
 
 func (s *ResourceService) CreateResource(ctx context.Context, name, dns string) (*models.Resource, error) {
-    // Validations
-    if len(name) < 3 {
-        return nil, fmt.Errorf("name must be at least 3 characters long")
-    }
-    if !isValidDNS(dns) {
-        return nil, fmt.Errorf("invalid DNS format")
-    }
-
     resource := models.CreateRequest{
         Name: name,
         Dns:  dns,
@@ -49,8 +44,8 @@ func (s *ResourceService) CreateResource(ctx context.Context, name, dns string) 
         return nil, fmt.Errorf("error marshaling JSON: %w", err)
     }
 
-    url := fmt.Sprintf("%s/resource", s.Config.APIBaseURL)
-    req, err := http.NewRequestWithContext(ctx, "POST", url, bytes.NewBuffer(jsonData))
+    endpoint := fmt.Sprintf("%s/resource", s.Config.APIBaseURL)
+    req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, bytes.NewBuffer(jsonData))
     if err != nil {
         return nil, fmt.Errorf("error creating HTTP request: %w", err)
     }
@@ -62,7 +57,7 @@ func (s *ResourceService) CreateResource(ctx context.Context, name, dns string) 
     }
     defer resp.Body.Close()
 
-    if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+    if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
         return nil, utils.ParseErrorResponse(resp)
     }
 

@@ -2,10 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -17,20 +14,19 @@ import (
 )
 
 func main() {
-    // Load configurations
-    cfg, err := config.LoadConfig()
-    if err != nil {
-        fmt.Fprintf(os.Stderr, "Error loading configurations: %v\n", err)
-        os.Exit(1)
-    }
-
     // Initialize the logger
-    logger, err := zap.NewProduction()
+    logger, err := utils.InitializeLogger()
     if err != nil {
-        fmt.Fprintf(os.Stderr, "Error initializing logger: %v\n", err)
         os.Exit(1)
     }
     defer logger.Sync()
+
+    // Load configurations
+    cfg, err := config.LoadConfig()
+    if err != nil {
+        logger.Error("Error loading configurations", zap.Error(err))
+        os.Exit(1)
+    }
 
     // Initialize the HTTP client
     client := utils.NewHTTPClient(cfg.Timeout)
@@ -56,16 +52,11 @@ func main() {
     ctx, cancel := context.WithCancel(context.Background())
     defer cancel()
 
-    go func() {
-        c := make(chan os.Signal, 1)
-        signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-        <-c
-        cancel()
-    }()
+    go utils.HandleSignals(cancel, logger)
 
     // Execute the root command with context
     if err := rootCmd.ExecuteContext(ctx); err != nil {
-        logger.Sugar().Errorf("Error executing command: %v", err)
+        logger.Error("Error executing command", zap.Error(err))
         os.Exit(1)
     }
 }
