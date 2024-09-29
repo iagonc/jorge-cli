@@ -17,7 +17,21 @@ func NewUpdateResource(repo repository.ResourceRepository, logger *zap.Logger) *
 
 // Execute updates a resource and logs relevant information or errors
 func (uc *UpdateResource) Execute(resource *schemas.Resource) error {
-    if err := uc.repo.Update(resource); err != nil {
+    existingResource, err := uc.repo.FindByID(resource.ID)
+    if err != nil {
+        uc.logger.Sugar().Errorf("Resource with ID %d not found: %v", resource.ID, err)
+        return err
+    }
+
+    // Update fields if they are provided
+    if resource.Name != "" {
+        existingResource.Name = resource.Name
+    }
+    if resource.Dns != "" {
+        existingResource.Dns = resource.Dns
+    }
+
+    if err := uc.repo.Update(existingResource); err != nil {
         uc.logger.Sugar().Errorf("Failed to update resource with ID %d: %v", resource.ID, err)
         return err
     }
