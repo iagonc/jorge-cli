@@ -6,7 +6,7 @@
 
 1. **Network Management**: Efficient tools for monitoring, diagnosing, and managing networks.
 2. **Task Automation**: Scripts and commands that streamline repetitive processes, saving time and reducing the risk of errors.
-3. **Integration with Cloud Services**: Seamlessly connect to various cloud providers, enabling direct resource management, configuration, and monitoring via the CLI.
+3. **Integration with Cloud Usecases**: Seamlessly connect to various cloud providers, enabling direct resource management, configuration, and monitoring via the CLI.
 4. **Observability Tools**: Integration with monitoring solutions to offer real-time insights into system performance and health.
 5. **Diagnostic Utilities**: Handy commands for quick diagnostics and troubleshooting in production environments.
 

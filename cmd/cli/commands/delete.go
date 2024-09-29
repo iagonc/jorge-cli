@@ -6,13 +6,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 
-	"github.com/iagonc/jorge-cli/cmd/cli/pkg/services"
+	"github.com/iagonc/jorge-cli/cmd/cli/pkg/usecase"
 	"github.com/iagonc/jorge-cli/cmd/cli/pkg/utils"
 
 	"go.uber.org/zap"
 )
 
-func NewDeleteCommand(service *services.ResourceService) *cobra.Command {
+func NewDeleteCommand(usecase *usecase.ResourceUsecase) *cobra.Command {
     var id string
 
     cmd := &cobra.Command{
@@ -23,14 +23,14 @@ func NewDeleteCommand(service *services.ResourceService) *cobra.Command {
 
             idInt, err := utils.ParseID(id)
             if err != nil {
-                service.Logger.Error("Invalid ID", zap.Error(err))
+                usecase.Logger.Error("Invalid ID", zap.Error(err))
                 fmt.Println(err)
                 return
             }
 
-            resource, err := service.GetResourceByID(ctx, idInt)
+            resource, err := usecase.GetResourceByID(ctx, idInt)
             if err != nil {
-                service.Logger.Error("Error fetching resource", zap.Error(err))
+                usecase.Logger.Error("Error fetching resource", zap.Error(err))
                 fmt.Println("Error fetching resource:", err)
                 return
             }
@@ -45,9 +45,9 @@ func NewDeleteCommand(service *services.ResourceService) *cobra.Command {
             }
 
             // Proceed with deletion
-            deletedResource, err := service.DeleteResource(ctx, idInt)
+            deletedResource, err := usecase.DeleteResource(ctx, idInt)
             if err != nil {
-                service.Logger.Error("Error deleting resource", zap.Error(err))
+                usecase.Logger.Error("Error deleting resource", zap.Error(err))
                 fmt.Println("Error deleting resource:", err)
                 return
             }

@@ -6,21 +6,21 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 
-	"github.com/iagonc/jorge-cli/cmd/cli/pkg/services"
+	"github.com/iagonc/jorge-cli/cmd/cli/pkg/usecase"
 	"github.com/iagonc/jorge-cli/cmd/cli/pkg/utils"
 
 	"go.uber.org/zap"
 )
 
-func NewListCommand(service *services.ResourceService) *cobra.Command {
+func NewListCommand(usecase *usecase.ResourceUsecase) *cobra.Command {
     return &cobra.Command{
         Use:   "list",
         Short: "List all resources",
         Run: func(cmd *cobra.Command, args []string) {
             ctx := cmd.Context()
-            resources, err := service.ListResources(ctx)
+            resources, err := usecase.ListResources(ctx)
             if err != nil {
-                service.Logger.Error("Error listing resources", zap.Error(err))
+                usecase.Logger.Error("Error listing resources", zap.Error(err))
                 fmt.Println("Error listing resources:", err)
                 return
             }

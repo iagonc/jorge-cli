@@ -9,7 +9,7 @@ import (
 
 	"github.com/iagonc/jorge-cli/cmd/cli/commands"
 	"github.com/iagonc/jorge-cli/cmd/cli/pkg/config"
-	"github.com/iagonc/jorge-cli/cmd/cli/pkg/services"
+	"github.com/iagonc/jorge-cli/cmd/cli/pkg/usecase"
 	"github.com/iagonc/jorge-cli/cmd/cli/pkg/utils"
 )
 
@@ -31,8 +31,8 @@ func main() {
     // Initialize the HTTP client
     client := utils.NewHTTPClient(cfg.Timeout)
 
-    // Initialize the resource service
-    resourceService := services.NewResourceService(client, cfg, logger)
+    // Initialize the resource Usecase
+    resourceUsecase := usecase.NewResourceUsecase(client, cfg, logger)
 
     // Set up the root command
     var rootCmd = &cobra.Command{
@@ -42,11 +42,11 @@ func main() {
         Version: cfg.Version,
     }
 
-    // Add commands, passing the resourceService
-    rootCmd.AddCommand(commands.NewListCommand(resourceService))
-    rootCmd.AddCommand(commands.NewCreateCommand(resourceService))
-    rootCmd.AddCommand(commands.NewDeleteCommand(resourceService))
-    rootCmd.AddCommand(commands.NewUpdateCommand(resourceService))
+    // Add commands, passing the resourceUsecase
+    rootCmd.AddCommand(commands.NewListCommand(resourceUsecase))
+    rootCmd.AddCommand(commands.NewCreateCommand(resourceUsecase))
+    rootCmd.AddCommand(commands.NewDeleteCommand(resourceUsecase))
+    rootCmd.AddCommand(commands.NewUpdateCommand(resourceUsecase))
 
     // Handle system signals for graceful shutdown
     ctx, cancel := context.WithCancel(context.Background())

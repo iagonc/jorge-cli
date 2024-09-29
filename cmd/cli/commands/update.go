@@ -6,13 +6,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 
-	"github.com/iagonc/jorge-cli/cmd/cli/pkg/services"
+	"github.com/iagonc/jorge-cli/cmd/cli/pkg/usecase"
 	"github.com/iagonc/jorge-cli/cmd/cli/pkg/utils"
 
 	"go.uber.org/zap"
 )
 
-func NewUpdateCommand(service *services.ResourceService) *cobra.Command {
+func NewUpdateCommand(usecase *usecase.ResourceUsecase) *cobra.Command {
     var id, name, dns string
 
     cmd := &cobra.Command{
@@ -23,7 +23,7 @@ func NewUpdateCommand(service *services.ResourceService) *cobra.Command {
 
             idInt, err := utils.ParseID(id)
             if err != nil {
-                service.Logger.Error("Invalid ID", zap.Error(err))
+                usecase.Logger.Error("Invalid ID", zap.Error(err))
                 fmt.Println(err)
                 return
             }
@@ -33,9 +33,9 @@ func NewUpdateCommand(service *services.ResourceService) *cobra.Command {
                 return
             }
 
-            updatedResource, err := service.UpdateResource(ctx, idInt, name, dns)
+            updatedResource, err := usecase.UpdateResource(ctx, idInt, name, dns)
             if err != nil {
-                service.Logger.Error("Error updating resource", zap.Error(err))
+                usecase.Logger.Error("Error updating resource", zap.Error(err))
                 fmt.Println("Error updating resource:", err)
                 return
             }
