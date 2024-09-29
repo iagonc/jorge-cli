@@ -6,13 +6,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 
-	"github.com/iagonc/jorge-cli/cmd/cli/pkg/usecase"
-	"github.com/iagonc/jorge-cli/cmd/cli/pkg/utils"
+	"github.com/iagonc/jorge-cli/cmd/cli/internal/usecase/resource"
+	"github.com/iagonc/jorge-cli/cmd/cli/internal/utils"
 
 	"go.uber.org/zap"
 )
 
-func NewUpdateCommand(usecase *usecase.ResourceUsecase) *cobra.Command {
+func NewUpdateCommand(usecase *resource.ResourceUsecase) *cobra.Command {
     var id, name, dns string
 
     cmd := &cobra.Command{
@@ -55,7 +55,6 @@ func NewUpdateCommand(usecase *usecase.ResourceUsecase) *cobra.Command {
         },
     }
 
-    // Add flags for "id", "name", and "dns"
     cmd.Flags().StringVarP(&id, "id", "i", "", "Resource ID (required)")
     cmd.Flags().StringVarP(&name, "name", "n", "", "New resource name")
     cmd.Flags().StringVarP(&dns, "dns", "d", "", "New resource DNS")

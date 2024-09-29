@@ -6,13 +6,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 
-	"github.com/iagonc/jorge-cli/cmd/cli/pkg/usecase"
-	"github.com/iagonc/jorge-cli/cmd/cli/pkg/utils"
+	"github.com/iagonc/jorge-cli/cmd/cli/internal/usecase/resource"
+	"github.com/iagonc/jorge-cli/cmd/cli/internal/utils"
 
 	"go.uber.org/zap"
 )
 
-func NewListCommand(usecase *usecase.ResourceUsecase) *cobra.Command {
+func NewListCommand(usecase *resource.ResourceUsecase) *cobra.Command {
     return &cobra.Command{
         Use:   "list",
         Short: "List all resources",

@@ -6,13 +6,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 
-	"github.com/iagonc/jorge-cli/cmd/cli/pkg/usecase"
-	"github.com/iagonc/jorge-cli/cmd/cli/pkg/utils"
+	"github.com/iagonc/jorge-cli/cmd/cli/internal/usecase/resource"
+	"github.com/iagonc/jorge-cli/cmd/cli/internal/utils"
 
 	"go.uber.org/zap"
 )
 
-func NewDeleteCommand(usecase *usecase.ResourceUsecase) *cobra.Command {
+func NewDeleteCommand(usecase *resource.ResourceUsecase) *cobra.Command {
 	var id string
 
 	cmd := &cobra.Command{
@@ -35,16 +35,13 @@ func NewDeleteCommand(usecase *usecase.ResourceUsecase) *cobra.Command {
 				return
 			}
 
-			// Display resource details
 			fmt.Printf("Resource Details:\nID: %d\nName: %s\nDNS: %s\n", resource.ID, resource.Name, resource.Dns)
 
-			// Ask for confirmation
 			if !utils.ConfirmAction("Are you sure you want to delete this resource? (yes/no): ") {
 				fmt.Println("Delete operation canceled.")
 				return
 			}
 
-			// Proceed with deletion
 			deletedResource, err := usecase.DeleteResource(ctx, idInt)
 			if err != nil {
 				usecase.Logger.Error("Error deleting resource", zap.Error(err))
@@ -65,7 +62,6 @@ func NewDeleteCommand(usecase *usecase.ResourceUsecase) *cobra.Command {
 		},
 	}
 
-	// Add flag for "id"
 	cmd.Flags().StringVarP(&id, "id", "i", "", "Resource ID (required)")
 	cmd.MarkFlagRequired("id")
 

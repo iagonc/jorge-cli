@@ -1,4 +1,4 @@
-package usecase
+package resource
 
 import (
 	"bytes"
@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/iagonc/jorge-cli/cmd/cli/pkg/models"
-	"github.com/iagonc/jorge-cli/cmd/cli/pkg/utils"
+	"github.com/iagonc/jorge-cli/cmd/cli/internal/models"
+	"github.com/iagonc/jorge-cli/cmd/cli/internal/utils"
 	"go.uber.org/zap"
 )
 

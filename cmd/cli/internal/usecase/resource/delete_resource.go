@@ -1,4 +1,4 @@
-package usecase
+package resource
 
 import (
 	"context"
@@ -8,8 +8,8 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/iagonc/jorge-cli/cmd/cli/pkg/models"
-	"github.com/iagonc/jorge-cli/cmd/cli/pkg/utils"
+	"github.com/iagonc/jorge-cli/cmd/cli/internal/models"
+	"github.com/iagonc/jorge-cli/cmd/cli/internal/utils"
 	"go.uber.org/zap"
 )
 

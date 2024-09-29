@@ -8,9 +8,10 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/iagonc/jorge-cli/cmd/cli/commands"
-	"github.com/iagonc/jorge-cli/cmd/cli/pkg/config"
-	"github.com/iagonc/jorge-cli/cmd/cli/pkg/usecase"
-	"github.com/iagonc/jorge-cli/cmd/cli/pkg/utils"
+	"github.com/iagonc/jorge-cli/cmd/cli/internal/config"
+	"github.com/iagonc/jorge-cli/cmd/cli/internal/usecase/network"
+	"github.com/iagonc/jorge-cli/cmd/cli/internal/usecase/resource"
+	"github.com/iagonc/jorge-cli/cmd/cli/internal/utils"
 )
 
 func main() {
@@ -31,19 +32,19 @@ func main() {
 	// Initialize the HTTP client
 	client := utils.NewHTTPClient(cfg.Timeout)
 
-	// Initialize the usecases
-	resourceUsecase := usecase.NewResourceUsecase(client, cfg, logger)
-	networkUsecase := usecase.NewNetworkDebugUsecase(logger)
+	// Initialize the resource Usecase
+	resourceUsecase := resource.NewResourceUsecase(client, cfg, logger)
+	networkUsecase := network.NewNetworkDebugUsecase(logger)
 
 	// Set up the root command
 	var rootCmd = &cobra.Command{
 		Use:     "jorge-cli",
-		Short:   "Jorge CLI - A friendly tool for network diagnostics and resource management",
-		Long:    "A command-line tool to interact with the API for managing resources and performing network diagnostics.",
+		Short:   "Jorge CLI - A friendly network diagnostic and resource management tool",
+		Long:    "A command-line tool to perform network diagnostics and manage resources via API.",
 		Version: cfg.Version,
 	}
 
-	// Add commands, passing the respective usecases
+	// Add commands, passing the usecases
 	rootCmd.AddCommand(commands.NewListCommand(resourceUsecase))
 	rootCmd.AddCommand(commands.NewCreateCommand(resourceUsecase))
 	rootCmd.AddCommand(commands.NewDeleteCommand(resourceUsecase))
