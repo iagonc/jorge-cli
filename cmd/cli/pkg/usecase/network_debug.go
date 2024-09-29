@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/iagonc/jorge-cli/cmd/cli/pkg/models"
@@ -23,103 +24,106 @@ func NewNetworkDebugUsecase(logger *zap.Logger) *NetworkDebugUsecase {
 	}
 }
 
-func (u *NetworkDebugUsecase) NetworkDebug(ctx context.Context, domain string) (*models.NetworkDebugResult, error) {
+func (u *NetworkDebugUsecase) NetworkDebug(ctx context.Context, domain string) (*models.NetworkDebugResult, []error) {
 	result := &models.NetworkDebugResult{}
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	var errorsList []error
 
-	// Execute all tools in parallel
-	errChan := make(chan error, 7)
-	resultChan := make(chan struct{}, 7)
-
-	// DNS Lookup (dig)
-	go func() {
-		dns, err := runDig(domain)
-		if err != nil {
-			errChan <- fmt.Errorf("dig error: %w", err)
-			return
-		}
-		result.DNSLookup = dns
-		resultChan <- struct{}{}
-	}()
-
-	// NSLookup
-	go func() {
-		ns, err := runNSLookup(domain)
-		if err != nil {
-			errChan <- fmt.Errorf("nslookup error: %w", err)
-			return
-		}
-		result.NSLookup = ns
-		resultChan <- struct{}{}
-	}()
-
-	// Traceroute
-	go func() {
-		tr, err := runTraceroute(domain)
-		if err != nil {
-			errChan <- fmt.Errorf("traceroute error: %w", err)
-			return
-		}
-		result.Traceroute = tr
-		resultChan <- struct{}{}
-	}()
-
-	// HTTP Request (curl)
-	go func() {
-		curl, err := runCurl(domain)
-		if err != nil {
-			errChan <- fmt.Errorf("curl error: %w", err)
-			return
-		}
-		result.HTTPRequest = curl
-		resultChan <- struct{}{}
-	}()
-
-	// Ping
-	go func() {
-		ping, err := runPing(domain)
-		if err != nil {
-			errChan <- fmt.Errorf("ping error: %w", err)
-			return
-		}
-		result.Ping = ping
-		resultChan <- struct{}{}
-	}()
-
-	// Netstat
-	go func() {
-		netstat, err := runNetstat()
-		if err != nil {
-			errChan <- fmt.Errorf("netstat error: %w", err)
-			return
-		}
-		result.Netstat = netstat
-		resultChan <- struct{}{}
-	}()
-
-	// Iftop
-	go func() {
-		iftop, err := runIftop("eth0") // Assuming eth0
-		if err != nil {
-			errChan <- fmt.Errorf("iftop error: %w", err)
-			return
-		}
-		result.Iftop = iftop
-		resultChan <- struct{}{}
-	}()
-
-	// Wait for all goroutines to finish
-	for i := 0; i < 7; i++ {
-		select {
-		case <-resultChan:
-			// Received a result, continue waiting
-		case err := <-errChan:
-			return nil, err
-		case <-ctx.Done():
-			return nil, ctx.Err()
+	// Define a helper function to execute a tool and handle results/errors
+	executeTool := func(toolName string, fn func() error) {
+		defer wg.Done()
+		if err := fn(); err != nil {
+			mu.Lock()
+			errorsList = append(errorsList, fmt.Errorf("%s error: %w", toolName, err))
+			mu.Unlock()
 		}
 	}
 
-	return result, nil
+	wg.Add(7)
+
+	// Execute tools concurrently
+	go executeTool("dig", func() error {
+		dns, err := runDig(domain)
+		if err != nil {
+			return err
+		}
+		mu.Lock()
+		result.DNSLookup = dns
+		mu.Unlock()
+		return nil
+	})
+
+	go executeTool("nslookup", func() error {
+		ns, err := runNSLookup(domain)
+		if err != nil {
+			return err
+		}
+		mu.Lock()
+		result.NSLookup = ns
+		mu.Unlock()
+		return nil
+	})
+
+	go executeTool("traceroute", func() error {
+		tr, err := runTraceroute(domain)
+		if err != nil {
+			return err
+		}
+		mu.Lock()
+		result.Traceroute = tr
+		mu.Unlock()
+		return nil
+	})
+
+	go executeTool("curl", func() error {
+		curl, err := runCurl(domain)
+		if err != nil {
+			return err
+		}
+		mu.Lock()
+		result.HTTPRequest = curl
+		mu.Unlock()
+		return nil
+	})
+
+	go executeTool("ping", func() error {
+		ping, err := runPing(domain)
+		if err != nil {
+			return err
+		}
+		mu.Lock()
+		result.Ping = ping
+		mu.Unlock()
+		return nil
+	})
+
+	go executeTool("netstat", func() error {
+		netstat, err := runNetstat()
+		if err != nil {
+			return err
+		}
+		mu.Lock()
+		result.Netstat = netstat
+		mu.Unlock()
+		return nil
+	})
+
+	go executeTool("iftop", func() error {
+		// TODO: Assuming eth0; consider making this configurable
+		iftop, err := runIftop("eth0")
+		if err != nil {
+			return err
+		}
+		mu.Lock()
+		result.Iftop = iftop
+		mu.Unlock()
+		return nil
+	})
+
+	wg.Wait()
+
+	return result, errorsList
 }
 
 // Helper functions to execute network tools
@@ -164,6 +168,10 @@ func runNSLookup(domain string) (models.NSLookupResult, error) {
 				break
 			}
 		}
+	}
+
+	if ip == "" {
+		return models.NSLookupResult{}, fmt.Errorf("no IP address found")
 	}
 
 	return models.NSLookupResult{

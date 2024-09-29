@@ -26,11 +26,11 @@ type HTTPRequestResult struct {
 }
 
 type PingResult struct {
-	Sent         int
-	Received     int
-	Lost         int
-	LossPercent  float64
-	AvgLatency   int
+	Sent        int
+	Received    int
+	Lost        int
+	LossPercent float64
+	AvgLatency  int
 }
 
 type NetstatConnection struct {
