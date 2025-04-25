@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	docs "github.com/iagonc/jorge-cli/docs" // Importando o Swagger gerado automaticamente
+	docs "github.com/iagonc/jorge-cli/docs"
 	"github.com/iagonc/jorge-cli/internal/handler"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -10,7 +10,7 @@ import (
 
 func initializeRoutes(router *gin.Engine, h *handler.Handler) {
 	basePath := "/api/v1"
-	docs.SwaggerInfo.BasePath = basePath // Definindo o caminho base no Swagger
+	docs.SwaggerInfo.BasePath = basePath
 
 	v1 := router.Group(basePath)
 	{
