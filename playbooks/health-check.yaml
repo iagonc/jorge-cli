@@ -1,0 +1,31 @@
+name: "health-check"
+version: "1.0.0"
+description: "Check health of multiple endpoints"
+author: "Jorge CLI"
+tags: ["health", "monitoring"]
+
+variables:
+  timeout: "10"
+
+inputs:
+  - name: endpoints
+    required: true
+    description: "Comma-separated list of endpoints to check"
+
+steps:
+  - id: check_endpoints
+    name: "Check All Endpoints"
+    type: loop
+    loop:
+      items: endpoints
+      as: endpoint
+      steps:
+        - id: check_single
+          name: "Check Endpoint"
+          type: builtin
+          builtin:
+            function: http_request
+            params:
+              url: "{{ .endpoint }}"
+              method: GET
+              timeout: 10

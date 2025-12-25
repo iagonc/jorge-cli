@@ -1,0 +1,83 @@
+name: "network-troubleshoot"
+version: "1.0.0"
+description: "Comprehensive network diagnostics for a domain"
+author: "Jorge CLI"
+tags: ["network", "troubleshooting", "diagnostics"]
+
+variables:
+  timeout: "30"
+
+inputs:
+  - name: domain
+    required: true
+    description: "Target domain to troubleshoot"
+
+requirements:
+  tools: ["dig", "ping", "curl"]
+
+steps:
+  - id: dns_check
+    name: "DNS Resolution"
+    type: builtin
+    builtin:
+      function: dns_lookup
+      params:
+        domain: "{{ .domain }}"
+    output:
+      - name: dns_ip
+        from: result.ip
+
+  - id: ping_test
+    name: "Connectivity Test"
+    type: builtin
+    builtin:
+      function: ping
+      params:
+        host: "{{ .domain }}"
+        count: 4
+    condition: "{{ .dns_ip }}"
+
+  - id: http_check
+    name: "HTTP Health Check"
+    type: builtin
+    builtin:
+      function: http_request
+      params:
+        url: "https://{{ .domain }}"
+        method: GET
+        expected_status: 200
+        timeout: 10
+    output:
+      - name: http_status
+        from: result.status_code
+
+  - id: ssl_check
+    name: "SSL Certificate Check"
+    type: builtin
+    builtin:
+      function: ssl_check
+      params:
+        domain: "{{ .domain }}"
+    output:
+      - name: ssl_valid
+        from: result.valid
+
+  - id: summary
+    name: "Print Summary"
+    type: shell
+    shell:
+      command: |
+        echo "=== Network Troubleshooting Summary ==="
+        echo "Domain: {{ .domain }}"
+        echo "DNS IP: {{ .dns_ip }}"
+        echo "HTTP Status: {{ .http_status }}"
+        echo "SSL Valid: {{ .ssl_valid }}"
+
+finally:
+  - id: cleanup
+    name: "Cleanup"
+    type: builtin
+    builtin:
+      function: echo
+      params:
+        message: "Network troubleshooting completed"
